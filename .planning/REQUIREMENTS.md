@@ -114,13 +114,50 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| *To be populated during roadmap creation* | | |
+| CRUD-01 | Phase 1 | Pending |
+| CRUD-02 | Phase 1 | Pending |
+| CRUD-03 | Phase 1 | Pending |
+| CRUD-04 | Phase 1 | Pending |
+| CRUD-05 | Phase 1 | Pending |
+| STATE-01 | Phase 1 | Pending |
+| STATE-02 | Phase 1 | Pending |
+| STATE-03 | Phase 1 | Pending |
+| STATE-04 | Phase 2 | Pending |
+| STATE-05 | Phase 1 | Pending |
+| COORD-01 | Phase 2 | Pending |
+| COORD-02 | Phase 2 | Pending |
+| COORD-03 | Phase 2 | Pending |
+| COORD-04 | Phase 2 | Pending |
+| COORD-05 | Phase 2 | Pending |
+| COORD-06 | Phase 2 | Pending |
+| QUERY-01 | Phase 3 | Pending |
+| QUERY-02 | Phase 3 | Pending |
+| QUERY-03 | Phase 3 | Pending |
+| QUERY-04 | Phase 3 | Pending |
+| QUERY-05 | Phase 3 | Pending |
+| QUERY-06 | Phase 3 | Pending |
+| EXPORT-01 | Phase 3 | Pending |
+| EXPORT-02 | Phase 3 | Pending |
+| EXPORT-03 | Phase 3 | Pending |
+| EXPORT-04 | Phase 3 | Pending |
+| CLI-01 | Phase 3 | Pending |
+| CLI-02 | Phase 3 | Pending |
+| CLI-03 | Phase 3 | Pending |
+| CLI-04 | Phase 1 | Pending |
+| CLI-05 | Phase 1 | Pending |
+| CLI-06 | Phase 1 | Pending |
+| TECH-01 | Phase 1 | Pending |
+| TECH-02 | Phase 1 | Pending |
+| TECH-03 | Phase 2 | Pending |
+| TECH-04 | Phase 2 | Pending |
+| TECH-05 | Phase 1 | Pending |
+| TECH-06 | Phase 1 | Pending |
 
 **Coverage:**
-- v1 requirements: 32 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 32 ⚠️
+- v1 requirements: 38 total
+- Mapped to phases: 38 (100%)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-22*
-*Last updated: 2026-02-22 after initial definition*
+*Last updated: 2026-02-22 after roadmap creation*
