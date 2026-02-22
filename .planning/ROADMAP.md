@@ -12,7 +12,7 @@ rtik delivers in three focused phases: foundation (database + CRUD), coordinatio
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Core Operations** - Database persistence, CRUD operations, and CLI infrastructure
+- [x] **Phase 1: Foundation & Core Operations** - Database persistence, CRUD operations, and CLI infrastructure (completed 2026-02-22)
 - [ ] **Phase 2: Agent Coordination & Dependencies** - Claiming mechanism, status transitions, and dependency tracking
 - [ ] **Phase 3: Search, Filtering & Export** - Powerful queries, short aliases, and agent-optimized export formats
 
@@ -33,8 +33,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md — Project scaffold and DB layer (Cargo setup, WAL, migrations, path resolution)
-- [ ] 01-02-PLAN.md — Ticket CRUD functions and CLI dispatch with output formatting
-- [ ] 01-03-PLAN.md — Integration tests and release binary verification
+- [x] 01-02-PLAN.md — Ticket CRUD functions and CLI dispatch with output formatting
+- [x] 01-03-PLAN.md — Integration tests and release binary verification
 
 ### Phase 2: Agent Coordination & Dependencies
 **Goal**: Multiple agents coordinate work through atomic claiming and dependency tracking without deadlocks
@@ -75,6 +75,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Core Operations | 2/3 | In Progress|  |
+| 1. Foundation & Core Operations | 3/3 | Complete   | 2026-02-22 |
 | 2. Agent Coordination & Dependencies | 0/TBD | Not started | - |
 | 3. Search, Filtering & Export | 0/TBD | Not started | - |
