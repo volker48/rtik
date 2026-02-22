@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 1 of 3 (Foundation & Core Operations)
-Plan: 1 of TBD in current phase
+Plan: 2 of TBD in current phase
 Status: In progress
-Last activity: 2026-02-22 — Completed 01-01: Foundation bootstrap (Cargo project, DB layer, CLI stubs)
+Last activity: 2026-02-22 — Completed 01-02: CRUD functions + CLI dispatch
 
-Progress: [█░░░░░░░░░] 10%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
+- Total plans completed: 2
 - Average duration: 2 min
-- Total execution time: 0.03 hours
+- Total execution time: 0.07 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-core-operations | 1 | 2 min | 2 min |
+| 01-foundation-core-operations | 2 | 4 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min)
-- Trend: N/A (only 1 plan)
+- Last 5 plans: 01-01 (2 min), 01-02 (2 min)
+- Trend: Consistent
 
 *Updated after each plan completion*
 
@@ -51,6 +51,9 @@ Recent decisions affecting current work:
 - WAL pragmas set immediately after Connection::open() before migrations to avoid journal mode not persisting
 - strftime('%Y-%m-%dT%H:%M:%SZ','now') in SQL DEFAULT for consistent ISO 8601 UTC timestamps
 - Status normalization via Clap value_parser at parse time — catches invalid input before reaching DB
+- Dynamic params Vec in update_ticket: only params matching the SET clause are bound (rusqlite named param constraint)
+- normalize_status as Option<String> declared before params Vec to ensure lifetime outlives the borrow
+- Fetch ticket before delete to include name in confirmation output
 
 ### Pending Todos
 
@@ -63,5 +66,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 01-01-PLAN.md
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None

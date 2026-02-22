@@ -9,17 +9,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### CRUD Operations
 
-- [ ] **CRUD-01**: User can create ticket with name and description via CLI
-- [ ] **CRUD-02**: User can view ticket details by ID
-- [ ] **CRUD-03**: User can update ticket fields (name, description, status)
-- [ ] **CRUD-04**: User can delete ticket by ID
-- [ ] **CRUD-05**: User can list all tickets
+- [x] **CRUD-01**: User can create ticket with name and description via CLI
+- [x] **CRUD-02**: User can view ticket details by ID
+- [x] **CRUD-03**: User can update ticket fields (name, description, status)
+- [x] **CRUD-04**: User can delete ticket by ID
+- [x] **CRUD-05**: User can list all tickets
 
 ### State Management
 
-- [ ] **STATE-01**: Ticket has status field with values: todo, WIP, blocked, done
-- [ ] **STATE-02**: Ticket automatically tracks created_at timestamp on creation
-- [ ] **STATE-03**: Ticket automatically updates updated_at timestamp on modification
+- [x] **STATE-01**: Ticket has status field with values: todo, WIP, blocked, done
+- [x] **STATE-02**: Ticket automatically tracks created_at timestamp on creation
+- [x] **STATE-03**: Ticket automatically updates updated_at timestamp on modification
 - [ ] **STATE-04**: Status transitions are validated (e.g., cannot go from done to todo)
 - [x] **STATE-05**: Ticket has unique auto-incrementing ID
 
@@ -53,7 +53,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **CLI-01**: CLI provides short alias 'new' for create command
 - [ ] **CLI-02**: CLI provides short alias 'ls' for list command
 - [ ] **CLI-03**: CLI provides short alias 'claim' for claim command
-- [ ] **CLI-04**: CLI provides helpful error messages with context
+- [x] **CLI-04**: CLI provides helpful error messages with context
 - [x] **CLI-05**: CLI exits with standard codes (0=success, 1=error, 2=usage)
 - [x] **CLI-06**: CLI handles broken pipe gracefully (piping to head/grep)
 
@@ -114,14 +114,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CRUD-01 | Phase 1 | Pending |
-| CRUD-02 | Phase 1 | Pending |
-| CRUD-03 | Phase 1 | Pending |
-| CRUD-04 | Phase 1 | Pending |
-| CRUD-05 | Phase 1 | Pending |
-| STATE-01 | Phase 1 | Pending |
-| STATE-02 | Phase 1 | Pending |
-| STATE-03 | Phase 1 | Pending |
+| CRUD-01 | Phase 1 | Complete |
+| CRUD-02 | Phase 1 | Complete |
+| CRUD-03 | Phase 1 | Complete |
+| CRUD-04 | Phase 1 | Complete |
+| CRUD-05 | Phase 1 | Complete |
+| STATE-01 | Phase 1 | Complete |
+| STATE-02 | Phase 1 | Complete |
+| STATE-03 | Phase 1 | Complete |
 | STATE-04 | Phase 2 | Pending |
 | STATE-05 | Phase 1 | Complete (01-01) |
 | COORD-01 | Phase 2 | Pending |
@@ -143,7 +143,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLI-01 | Phase 3 | Pending |
 | CLI-02 | Phase 3 | Pending |
 | CLI-03 | Phase 3 | Pending |
-| CLI-04 | Phase 1 | Pending |
+| CLI-04 | Phase 1 | Complete |
 | CLI-05 | Phase 1 | Complete (01-01) |
 | CLI-06 | Phase 1 | Complete (01-01) |
 | TECH-01 | Phase 1 | Complete (01-01) |
