@@ -47,7 +47,7 @@ pub struct ListArgs {
     pub timestamps: bool,
 }
 
-fn parse_status(raw: &str) -> Result<String, String> {
+pub fn parse_status(raw: &str) -> Result<String, String> {
     let normalized = raw.to_lowercase();
     match normalized.as_str() {
         "todo" | "wip" | "blocked" | "done" => Ok(normalized),
