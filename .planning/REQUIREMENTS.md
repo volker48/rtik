@@ -21,7 +21,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **STATE-02**: Ticket automatically tracks created_at timestamp on creation
 - [ ] **STATE-03**: Ticket automatically updates updated_at timestamp on modification
 - [ ] **STATE-04**: Status transitions are validated (e.g., cannot go from done to todo)
-- [ ] **STATE-05**: Ticket has unique auto-incrementing ID
+- [x] **STATE-05**: Ticket has unique auto-incrementing ID
 
 ### Agent Coordination
 
@@ -54,17 +54,17 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **CLI-02**: CLI provides short alias 'ls' for list command
 - [ ] **CLI-03**: CLI provides short alias 'claim' for claim command
 - [ ] **CLI-04**: CLI provides helpful error messages with context
-- [ ] **CLI-05**: CLI exits with standard codes (0=success, 1=error, 2=usage)
-- [ ] **CLI-06**: CLI handles broken pipe gracefully (piping to head/grep)
+- [x] **CLI-05**: CLI exits with standard codes (0=success, 1=error, 2=usage)
+- [x] **CLI-06**: CLI handles broken pipe gracefully (piping to head/grep)
 
 ### Technical Infrastructure
 
-- [ ] **TECH-01**: All data persists in SQLite database
-- [ ] **TECH-02**: SQLite uses WAL mode for concurrent reads during writes
+- [x] **TECH-01**: All data persists in SQLite database
+- [x] **TECH-02**: SQLite uses WAL mode for concurrent reads during writes
 - [ ] **TECH-03**: Claim operations use atomic UPDATE to prevent race conditions
 - [ ] **TECH-04**: Database transactions use IMMEDIATE mode to prevent write starvation
-- [ ] **TECH-05**: CLI compiles to single binary with zero runtime dependencies
-- [ ] **TECH-06**: Database schema supports migrations for future changes
+- [x] **TECH-05**: CLI compiles to single binary with zero runtime dependencies
+- [x] **TECH-06**: Database schema supports migrations for future changes
 
 ## v2 Requirements
 
@@ -123,7 +123,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STATE-02 | Phase 1 | Pending |
 | STATE-03 | Phase 1 | Pending |
 | STATE-04 | Phase 2 | Pending |
-| STATE-05 | Phase 1 | Pending |
+| STATE-05 | Phase 1 | Complete (01-01) |
 | COORD-01 | Phase 2 | Pending |
 | COORD-02 | Phase 2 | Pending |
 | COORD-03 | Phase 2 | Pending |
@@ -144,14 +144,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLI-02 | Phase 3 | Pending |
 | CLI-03 | Phase 3 | Pending |
 | CLI-04 | Phase 1 | Pending |
-| CLI-05 | Phase 1 | Pending |
-| CLI-06 | Phase 1 | Pending |
-| TECH-01 | Phase 1 | Pending |
-| TECH-02 | Phase 1 | Pending |
+| CLI-05 | Phase 1 | Complete (01-01) |
+| CLI-06 | Phase 1 | Complete (01-01) |
+| TECH-01 | Phase 1 | Complete (01-01) |
+| TECH-02 | Phase 1 | Complete (01-01) |
 | TECH-03 | Phase 2 | Pending |
 | TECH-04 | Phase 2 | Pending |
-| TECH-05 | Phase 1 | Pending |
-| TECH-06 | Phase 1 | Pending |
+| TECH-05 | Phase 1 | Complete (01-01) |
+| TECH-06 | Phase 1 | Complete (01-01) |
 
 **Coverage:**
 - v1 requirements: 38 total
@@ -160,4 +160,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-22*
-*Last updated: 2026-02-22 after roadmap creation*
+*Last updated: 2026-02-22 after 01-01 completion*

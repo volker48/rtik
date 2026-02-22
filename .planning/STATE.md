@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 1 of 3 (Foundation & Core Operations)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-22 — Roadmap created with 3 phases
+Plan: 1 of TBD in current phase
+Status: In progress
+Last activity: 2026-02-22 — Completed 01-01: Foundation bootstrap (Cargo project, DB layer, CLI stubs)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: N/A
-- Total execution time: 0.0 hours
+- Total plans completed: 1
+- Average duration: 2 min
+- Total execution time: 0.03 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-foundation-core-operations | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: None yet
-- Trend: N/A
+- Last 5 plans: 01-01 (2 min)
+- Trend: N/A (only 1 plan)
 
 *Updated after each plan completion*
 
@@ -47,6 +47,10 @@ Recent decisions affecting current work:
 - Dependencies informational only: Agents can decide context-specifically whether deps matter - avoid over-constraining
 - Blocked status is manual: Blocked means external issue, separate from dependency state
 - Plain text export format: Token-efficient for LLM context, human-readable for debugging
+- rusqlite bundled feature: statically links libsqlite3 for zero runtime deps (TECH-05)
+- WAL pragmas set immediately after Connection::open() before migrations to avoid journal mode not persisting
+- strftime('%Y-%m-%dT%H:%M:%SZ','now') in SQL DEFAULT for consistent ISO 8601 UTC timestamps
+- Status normalization via Clap value_parser at parse time — catches invalid input before reaching DB
 
 ### Pending Todos
 
@@ -59,5 +63,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Roadmap creation complete
+Stopped at: Completed 01-01-PLAN.md
 Resume file: None
