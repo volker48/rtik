@@ -29,10 +29,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. User can list all tickets with status, timestamps, and IDs
   5. CLI provides helpful error messages and exits with standard codes (0=success, 1=error, 2=usage)
   6. SQLite database persists between CLI invocations with WAL mode enabled
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] TBD after planning
+- [ ] 01-01-PLAN.md — Project scaffold and DB layer (Cargo setup, WAL, migrations, path resolution)
+- [ ] 01-02-PLAN.md — Ticket CRUD functions and CLI dispatch with output formatting
+- [ ] 01-03-PLAN.md — Integration tests and release binary verification
 
 ### Phase 2: Agent Coordination & Dependencies
 **Goal**: Multiple agents coordinate work through atomic claiming and dependency tracking without deadlocks
@@ -73,6 +75,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Core Operations | 0/TBD | Not started | - |
+| 1. Foundation & Core Operations | 0/3 | Not started | - |
 | 2. Agent Coordination & Dependencies | 0/TBD | Not started | - |
 | 3. Search, Filtering & Export | 0/TBD | Not started | - |
