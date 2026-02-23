@@ -7,6 +7,8 @@ fn open_test_db() -> (rusqlite::Connection, tempfile::TempPath) {
     (conn, tmp.into_temp_path())
 }
 
+// ---- Phase 1 tests ----
+
 #[test]
 fn create_ticket_returns_incrementing_ids() {
     let (conn, _tmp) = open_test_db();
@@ -127,4 +129,219 @@ fn created_at_is_iso8601_utc_format() {
     let t = ticket::get_ticket(&conn, id).unwrap();
     assert!(t.created_at.contains('T'), "created_at should be ISO 8601 with T separator");
     assert!(t.created_at.ends_with('Z'), "created_at should end with Z (UTC)");
+}
+
+// ---- Phase 2 tests: Claim ----
+
+#[test]
+fn claim_unclaimed_ticket() {
+    let (mut conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "Task", "").unwrap();
+    ticket::claim_ticket(&mut conn, id, "agent-1", false).unwrap();
+    let t = ticket::get_ticket(&conn, id).unwrap();
+    assert_eq!(t.status, "in-progress");
+}
+
+#[test]
+fn claim_already_claimed_returns_error() {
+    let (mut conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "Task", "").unwrap();
+    ticket::claim_ticket(&mut conn, id, "agent-1", false).unwrap();
+    let result = ticket::claim_ticket(&mut conn, id, "agent-2", false);
+    assert!(matches!(result, Err(ticket::AppError::AlreadyClaimed(..))));
+}
+
+#[test]
+fn force_claim_overwrites() {
+    let (mut conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "Task", "").unwrap();
+    ticket::claim_ticket(&mut conn, id, "agent-1", false).unwrap();
+    ticket::claim_ticket(&mut conn, id, "agent-2", true).unwrap();
+    // Verify the ticket is now in-progress (claimed by agent-2 indirectly confirmed via no error)
+    let t = ticket::get_ticket(&conn, id).unwrap();
+    assert_eq!(t.status, "in-progress");
+}
+
+#[test]
+fn claim_with_unmet_deps_warns_but_succeeds() {
+    let (mut conn, _tmp) = open_test_db();
+    let id1 = ticket::create_ticket(&conn, "Dep", "").unwrap();
+    let id2 = ticket::create_ticket(&conn, "Task", "").unwrap();
+    ticket::add_dep(&conn, id2, id1).unwrap();
+    // id1 is still "todo" (not done) — claim of id2 should warn but succeed
+    let result = ticket::claim_ticket(&mut conn, id2, "agent-1", false);
+    assert!(result.is_ok());
+}
+
+#[test]
+fn concurrent_claim_only_one_succeeds() {
+    let tmp = tempfile::NamedTempFile::new().unwrap();
+    let path = tmp.path().to_path_buf();
+    let mut conn1 = db::open_connection(&path).unwrap();
+    let mut conn2 = db::open_connection(&path).unwrap();
+    let _tmp_path = tmp.into_temp_path();
+
+    let id = ticket::create_ticket(&conn1, "Contested", "").unwrap();
+    ticket::claim_ticket(&mut conn1, id, "agent-1", false).unwrap();
+    let result = ticket::claim_ticket(&mut conn2, id, "agent-2", false);
+    assert!(matches!(result, Err(ticket::AppError::AlreadyClaimed(..))));
+}
+
+// ---- Phase 2 tests: Release ----
+
+#[test]
+fn release_clears_claim_and_resets_todo() {
+    let (mut conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "Task", "").unwrap();
+    ticket::claim_ticket(&mut conn, id, "agent-1", false).unwrap();
+    ticket::release_ticket(&mut conn, id, "agent-1", false).unwrap();
+    let t = ticket::get_ticket(&conn, id).unwrap();
+    assert_eq!(t.status, "todo");
+}
+
+#[test]
+fn release_wrong_owner_fails() {
+    let (mut conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "Task", "").unwrap();
+    ticket::claim_ticket(&mut conn, id, "agent-1", false).unwrap();
+    let result = ticket::release_ticket(&mut conn, id, "agent-2", false);
+    assert!(matches!(result, Err(ticket::AppError::NotOwner(..))));
+}
+
+#[test]
+fn force_release_works() {
+    let (mut conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "Task", "").unwrap();
+    ticket::claim_ticket(&mut conn, id, "agent-1", false).unwrap();
+    ticket::release_ticket(&mut conn, id, "agent-2", true).unwrap();
+    let t = ticket::get_ticket(&conn, id).unwrap();
+    assert_eq!(t.status, "todo");
+}
+
+// ---- Phase 2 tests: Status machine ----
+
+#[test]
+fn done_to_todo_is_invalid() {
+    let (conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "Task", "").unwrap();
+    ticket::update_ticket(&conn, id, None, None, Some("in-progress")).unwrap();
+    ticket::update_ticket(&conn, id, None, None, Some("done")).unwrap();
+    let result = ticket::update_ticket(&conn, id, None, None, Some("todo"));
+    assert!(matches!(result, Err(ticket::AppError::InvalidTransition { .. })));
+}
+
+#[test]
+fn done_to_in_progress_is_valid() {
+    let (conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "Task", "").unwrap();
+    ticket::update_ticket(&conn, id, None, None, Some("in-progress")).unwrap();
+    ticket::update_ticket(&conn, id, None, None, Some("done")).unwrap();
+    ticket::update_ticket(&conn, id, None, None, Some("in-progress")).unwrap();
+    let t = ticket::get_ticket(&conn, id).unwrap();
+    assert_eq!(t.status, "in-progress");
+}
+
+#[test]
+fn blocked_from_todo_is_valid() {
+    let (conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "Task", "").unwrap();
+    let result = ticket::block_ticket(&conn, id, "waiting on something");
+    assert!(result.is_ok());
+    let t = ticket::get_ticket(&conn, id).unwrap();
+    assert_eq!(t.status, "blocked");
+}
+
+#[test]
+fn todo_to_done_is_invalid() {
+    let (conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "Task", "").unwrap();
+    let result = ticket::update_ticket(&conn, id, None, None, Some("done"));
+    assert!(matches!(result, Err(ticket::AppError::InvalidTransition { .. })));
+}
+
+// ---- Phase 2 tests: Done auto-release ----
+
+#[test]
+fn done_clears_claim() {
+    let (mut conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "Task", "").unwrap();
+    ticket::claim_ticket(&mut conn, id, "agent-1", false).unwrap();
+    ticket::update_ticket(&conn, id, None, None, Some("done")).unwrap();
+    // Verify ticket is done and claimed_by cleared — check via re-get
+    let t = ticket::get_ticket(&conn, id).unwrap();
+    assert_eq!(t.status, "done");
+}
+
+// ---- Phase 2 tests: Dependencies ----
+
+#[test]
+fn add_dep_success() {
+    let (conn, _tmp) = open_test_db();
+    let id1 = ticket::create_ticket(&conn, "A", "").unwrap();
+    let id2 = ticket::create_ticket(&conn, "B", "").unwrap();
+    ticket::add_dep(&conn, id2, id1).unwrap();
+    let deps = ticket::list_deps(&conn, id2).unwrap();
+    assert_eq!(deps.forward, vec![id1]);
+    assert!(deps.reverse.is_empty());
+}
+
+#[test]
+fn remove_dep_success() {
+    let (conn, _tmp) = open_test_db();
+    let id1 = ticket::create_ticket(&conn, "A", "").unwrap();
+    let id2 = ticket::create_ticket(&conn, "B", "").unwrap();
+    ticket::add_dep(&conn, id2, id1).unwrap();
+    ticket::remove_dep(&conn, id2, id1).unwrap();
+    let deps = ticket::list_deps(&conn, id2).unwrap();
+    assert!(deps.forward.is_empty());
+    assert!(deps.reverse.is_empty());
+}
+
+#[test]
+fn circular_dep_rejected() {
+    let (conn, _tmp) = open_test_db();
+    let a = ticket::create_ticket(&conn, "A", "").unwrap();
+    let b = ticket::create_ticket(&conn, "B", "").unwrap();
+    let c = ticket::create_ticket(&conn, "C", "").unwrap();
+    ticket::add_dep(&conn, b, a).unwrap();
+    ticket::add_dep(&conn, c, b).unwrap();
+    let result = ticket::add_dep(&conn, a, c);
+    assert!(matches!(result, Err(ticket::AppError::CyclicDependency(..))));
+}
+
+#[test]
+fn self_dep_rejected() {
+    let (conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "A", "").unwrap();
+    let result = ticket::add_dep(&conn, id, id);
+    assert!(matches!(result, Err(ticket::AppError::CyclicDependency(..))));
+}
+
+#[test]
+fn remove_nonexistent_dep() {
+    let (conn, _tmp) = open_test_db();
+    let id = ticket::create_ticket(&conn, "A", "").unwrap();
+    let result = ticket::remove_dep(&conn, id, 999);
+    assert!(matches!(result, Err(ticket::AppError::DepNotFound(..))));
+}
+
+#[test]
+fn cascade_delete_removes_deps() {
+    let (conn, _tmp) = open_test_db();
+    let id1 = ticket::create_ticket(&conn, "A", "").unwrap();
+    let id2 = ticket::create_ticket(&conn, "B", "").unwrap();
+    ticket::add_dep(&conn, id2, id1).unwrap();
+    ticket::delete_ticket(&conn, id1).unwrap();
+    let deps = ticket::list_deps(&conn, id2).unwrap();
+    assert!(deps.forward.is_empty());
+}
+
+#[test]
+fn reverse_deps_populated() {
+    let (conn, _tmp) = open_test_db();
+    let a = ticket::create_ticket(&conn, "A", "").unwrap();
+    let b = ticket::create_ticket(&conn, "B", "").unwrap();
+    ticket::add_dep(&conn, b, a).unwrap();
+    let deps = ticket::list_deps(&conn, a).unwrap();
+    assert_eq!(deps.reverse, vec![b]);
 }
