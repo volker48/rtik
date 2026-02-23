@@ -1,4 +1,5 @@
 use rusqlite::{Connection, TransactionBehavior};
+use std::collections::{HashMap, HashSet};
 use thiserror::Error;
 
 #[derive(Debug)]
@@ -31,6 +32,10 @@ pub enum AppError {
     NotClaimed(i64),
     #[error("RTIK_AGENT not set — set it to identify this agent")]
     AgentNotSet,
+    #[error("cycle detected: {0}")]
+    CyclicDependency(String),
+    #[error("dependency from #{0} to #{1} not found")]
+    DepNotFound(i64, i64),
     #[error(transparent)]
     Db(#[from] rusqlite::Error),
 }
@@ -298,6 +303,111 @@ pub fn update_ticket(
             Ok(t.name)
         }
     }
+}
+
+pub struct DepInfo {
+    pub forward: Vec<i64>,
+    pub reverse: Vec<i64>,
+}
+
+pub fn would_create_cycle(
+    conn: &Connection,
+    ticket_id: i64,
+    new_dep: i64,
+) -> Result<Option<Vec<i64>>, AppError> {
+    let mut adj: HashMap<i64, Vec<i64>> = HashMap::new();
+    let mut stmt = conn.prepare("SELECT ticket_id, depends_on FROM ticket_deps")?;
+    let rows = stmt.query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, i64>(1)?)))?;
+    for row in rows {
+        let (from, to) = row?;
+        adj.entry(from).or_default().push(to);
+    }
+    adj.entry(ticket_id).or_default().push(new_dep);
+
+    let mut visited: HashSet<i64> = HashSet::new();
+    let mut path: Vec<i64> = Vec::new();
+    if dfs_finds_target(&adj, new_dep, ticket_id, &mut visited, &mut path) {
+        path.insert(0, ticket_id);
+        return Ok(Some(path));
+    }
+    Ok(None)
+}
+
+fn dfs_finds_target(
+    adj: &HashMap<i64, Vec<i64>>,
+    current: i64,
+    target: i64,
+    visited: &mut HashSet<i64>,
+    path: &mut Vec<i64>,
+) -> bool {
+    if current == target {
+        return true;
+    }
+    if !visited.insert(current) {
+        return false;
+    }
+    path.push(current);
+    if let Some(neighbors) = adj.get(&current) {
+        for &next in neighbors {
+            if dfs_finds_target(adj, next, target, visited, path) {
+                return true;
+            }
+        }
+    }
+    path.pop();
+    false
+}
+
+pub fn add_dep(conn: &Connection, ticket_id: i64, depends_on: i64) -> Result<(), AppError> {
+    get_ticket(conn, ticket_id)?;
+    get_ticket(conn, depends_on)?;
+    if ticket_id == depends_on {
+        return Err(AppError::CyclicDependency(format!(
+            "#{} → #{}",
+            ticket_id, depends_on
+        )));
+    }
+    if let Some(path) = would_create_cycle(conn, ticket_id, depends_on)? {
+        let cycle_str = path
+            .iter()
+            .map(|id| format!("#{}", id))
+            .collect::<Vec<_>>()
+            .join(" → ");
+        return Err(AppError::CyclicDependency(cycle_str));
+    }
+    conn.execute(
+        "INSERT INTO ticket_deps (ticket_id, depends_on) VALUES (?1, ?2)",
+        rusqlite::params![ticket_id, depends_on],
+    )?;
+    Ok(())
+}
+
+pub fn remove_dep(conn: &Connection, ticket_id: i64, depends_on: i64) -> Result<(), AppError> {
+    conn.execute(
+        "DELETE FROM ticket_deps WHERE ticket_id=?1 AND depends_on=?2",
+        rusqlite::params![ticket_id, depends_on],
+    )?;
+    if conn.changes() == 0 {
+        return Err(AppError::DepNotFound(ticket_id, depends_on));
+    }
+    Ok(())
+}
+
+pub fn list_deps(conn: &Connection, ticket_id: i64) -> Result<DepInfo, AppError> {
+    let mut stmt = conn.prepare(
+        "SELECT depends_on FROM ticket_deps WHERE ticket_id=?1 ORDER BY depends_on",
+    )?;
+    let forward: Vec<i64> = stmt
+        .query_map(rusqlite::params![ticket_id], |r| r.get(0))?
+        .collect::<rusqlite::Result<Vec<_>>>()?;
+
+    let mut stmt = conn
+        .prepare("SELECT ticket_id FROM ticket_deps WHERE depends_on=?1 ORDER BY ticket_id")?;
+    let reverse: Vec<i64> = stmt
+        .query_map(rusqlite::params![ticket_id], |r| r.get(0))?
+        .collect::<rusqlite::Result<Vec<_>>>()?;
+
+    Ok(DepInfo { forward, reverse })
 }
 
 fn chrono_free_utc_now() -> String {
