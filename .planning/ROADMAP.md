@@ -13,7 +13,7 @@ rtik delivers in three focused phases: foundation (database + CRUD), coordinatio
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Core Operations** - Database persistence, CRUD operations, and CLI infrastructure (completed 2026-02-22)
-- [ ] **Phase 2: Agent Coordination & Dependencies** - Claiming mechanism, status transitions, and dependency tracking
+- [x] **Phase 2: Agent Coordination & Dependencies** - Claiming mechanism, status transitions, and dependency tracking (completed 2026-02-23)
 - [ ] **Phase 3: Search, Filtering & Export** - Powerful queries, short aliases, and agent-optimized export formats
 
 ## Phase Details
@@ -50,10 +50,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Schema migration M2 (wip→in-progress rename, add claimed_by/claimed_at/block_reason columns, ticket_deps table)
-- [ ] 02-02-PLAN.md — Claim, release, block commands + status state machine enforcement
-- [ ] 02-03-PLAN.md — Dependency management (add/remove/cycle detection/display in get+list)
-- [ ] 02-04-PLAN.md — Phase 2 integration tests (≥17 tests covering all coordination behaviors)
+- [x] 02-01-PLAN.md — Schema migration M2 (wip→in-progress rename, add claimed_by/claimed_at/block_reason columns, ticket_deps table)
+- [x] 02-02-PLAN.md — Claim, release, block commands + status state machine enforcement
+- [x] 02-03-PLAN.md — Dependency management (add/remove/cycle detection/display in get+list)
+- [x] 02-04-PLAN.md — Phase 2 integration tests (≥17 tests covering all coordination behaviors)
 
 ### Phase 3: Search, Filtering & Export
 **Goal**: Agents efficiently discover relevant work and export context in token-optimized formats
@@ -79,5 +79,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Core Operations | 3/3 | Complete   | 2026-02-22 |
-| 2. Agent Coordination & Dependencies | 3/4 | In Progress|  |
+| 2. Agent Coordination & Dependencies | 4/4 | Complete   | 2026-02-23 |
 | 3. Search, Filtering & Export | 0/TBD | Not started | - |
