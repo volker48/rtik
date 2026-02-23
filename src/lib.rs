@@ -54,7 +54,8 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
             println!("Deleted: #{} {}", id, t.name);
         }
         Commands::List(args) => {
-            let tickets = ticket::list_tickets(&conn)?;
+            let filter = build_filter_from_list(&args)?;
+            let tickets = ticket::list_tickets_filtered(&conn, &filter)?;
             if tickets.is_empty() {
                 println!("No tickets.");
                 return Ok(());
@@ -135,12 +136,59 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
                 }
             }
         }
-        Commands::Export(_args) => {
-            eprintln!("export: not yet implemented");
-            std::process::exit(1);
+        Commands::Export(args) => {
+            let filter = build_filter_from_export(&args);
+            let exports = ticket::tickets_to_export(&conn, &filter)?;
+            if args.json {
+                println!("{}", serde_json::to_string_pretty(&exports).expect("serialize"));
+            } else {
+                for e in &exports {
+                    println!("{}", ticket::format_export_text(e));
+                }
+            }
         }
     }
     Ok(())
+}
+
+fn build_filter_from_list(args: &cli::ListArgs) -> Result<ticket::ListFilter, ticket::AppError> {
+    if args.claimed && args.unclaimed {
+        eprintln!("Error: --claimed and --unclaimed are mutually exclusive");
+        std::process::exit(1);
+    }
+    let claimed = if args.claimed {
+        Some(true)
+    } else if args.unclaimed {
+        Some(false)
+    } else {
+        None
+    };
+    Ok(ticket::ListFilter {
+        status: args.status.clone(),
+        claimed,
+        claimer: args.claimer.clone(),
+        search: args.search.clone(),
+    })
+}
+
+fn build_filter_from_export(args: &cli::ExportArgs) -> ticket::ListFilter {
+    if args.claimed && args.unclaimed {
+        eprintln!("Error: --claimed and --unclaimed are mutually exclusive");
+        std::process::exit(1);
+    }
+    let claimed = if args.claimed {
+        Some(true)
+    } else if args.unclaimed {
+        Some(false)
+    } else {
+        None
+    };
+    ticket::ListFilter {
+        status: args.status.clone(),
+        claimed,
+        claimer: args.claimer.clone(),
+        search: args.search.clone(),
+    }
 }
 
 fn truncate_name(name: &str, max_len: usize) -> String {
