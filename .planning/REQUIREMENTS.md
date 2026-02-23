@@ -26,8 +26,8 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Agent Coordination
 
 - [x] **COORD-01**: Agent can claim ticket (sets claimed_by field)
-- [ ] **COORD-02**: Claimed ticket records claimed_at timestamp
-- [ ] **COORD-03**: Agent can release/unclaim ticket (allows reassignment)
+- [x] **COORD-02**: Claimed ticket records claimed_at timestamp
+- [x] **COORD-03**: Agent can release/unclaim ticket (allows reassignment)
 - [ ] **COORD-04**: User can add dependency between tickets (ticket A depends on ticket B)
 - [ ] **COORD-05**: User can remove dependency between tickets
 - [ ] **COORD-06**: System detects and rejects circular dependencies
@@ -61,8 +61,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **TECH-01**: All data persists in SQLite database
 - [x] **TECH-02**: SQLite uses WAL mode for concurrent reads during writes
-- [ ] **TECH-03**: Claim operations use atomic UPDATE to prevent race conditions
-- [ ] **TECH-04**: Database transactions use IMMEDIATE mode to prevent write starvation
+- [x] **TECH-03**: Claim operations use atomic UPDATE to prevent race conditions
+- [x] **TECH-04**: Database transactions use IMMEDIATE mode to prevent write starvation
 - [x] **TECH-05**: CLI compiles to single binary with zero runtime dependencies
 - [x] **TECH-06**: Database schema supports migrations for future changes
 
@@ -125,8 +125,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STATE-04 | Phase 2 | Complete |
 | STATE-05 | Phase 1 | Complete (01-01) |
 | COORD-01 | Phase 2 | Complete |
-| COORD-02 | Phase 2 | Pending |
-| COORD-03 | Phase 2 | Pending |
+| COORD-02 | Phase 2 | Complete |
+| COORD-03 | Phase 2 | Complete |
 | COORD-04 | Phase 2 | Pending |
 | COORD-05 | Phase 2 | Pending |
 | COORD-06 | Phase 2 | Pending |
@@ -148,8 +148,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLI-06 | Phase 1 | Complete (01-01) |
 | TECH-01 | Phase 1 | Complete (01-01) |
 | TECH-02 | Phase 1 | Complete (01-01) |
-| TECH-03 | Phase 2 | Pending |
-| TECH-04 | Phase 2 | Pending |
+| TECH-03 | Phase 2 | Complete |
+| TECH-04 | Phase 2 | Complete |
 | TECH-05 | Phase 1 | Complete (01-01) |
 | TECH-06 | Phase 1 | Complete (01-01) |
 

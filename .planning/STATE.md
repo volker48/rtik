@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 2 of 3 (Agent Coordination & Dependencies)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In Progress
-Last activity: 2026-02-23 — Completed 02-01: Schema evolution M2 migration
+Last activity: 2026-02-23 — Completed 02-02: Atomic claiming and status state machine
 
 Progress: [████░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 2 min
-- Total execution time: 0.09 hours
+- Total execution time: 0.10 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-core-operations | 3 | 5 min | 2 min |
-| 02-agent-coordination-dependencies | 1 | 2 min | 2 min |
+| 02-agent-coordination-dependencies | 2 | 4 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (2 min), 01-03 (1 min), 02-01 (2 min)
+- Last 5 plans: 01-02 (2 min), 01-03 (1 min), 02-01 (2 min), 02-02 (2 min)
 - Trend: Consistent
 
 *Updated after each plan completion*
@@ -58,6 +58,9 @@ Recent decisions affecting current work:
 - [Phase 01-foundation-core-operations]: tempfile::NamedTempFile + into_temp_path() for test isolation: keeps file alive alongside Connection for full test scope
 - [Phase 02-01]: Combine all M2 migration steps into single M::up string for atomicity (table rebuild + ticket_deps creation)
 - [Phase 02-01]: wip completely removed — in-progress is the canonical in-flight status as locked by CONTEXT.md
+- [Phase 02]: Use named struct variant for InvalidTransition (thiserror cannot call .join() on positional tuple args)
+- [Phase 02]: conn shadowed as mut inside run() rather than changing public signature — avoids touching main.rs
+- [Phase 02]: validate_transition called in update_ticket with pre-fetch of current status (one extra query per status change)
 
 ### Pending Todos
 
@@ -70,5 +73,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 02-01-PLAN.md
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
