@@ -44,9 +44,9 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Export
 
 - [x] **EXPORT-01**: User can export tickets to plain text format
-- [ ] **EXPORT-02**: Plain text export includes: ID, name, description, dependencies
-- [ ] **EXPORT-03**: Plain text export is token-efficient (minimal verbosity)
-- [ ] **EXPORT-04**: User can export tickets to JSON format
+- [x] **EXPORT-02**: Plain text export includes: ID, name, description, dependencies
+- [x] **EXPORT-03**: Plain text export is token-efficient (minimal verbosity)
+- [x] **EXPORT-04**: User can export tickets to JSON format
 
 ### CLI Interface
 
@@ -137,9 +137,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QUERY-05 | Phase 3 | Complete |
 | QUERY-06 | Phase 3 | Complete |
 | EXPORT-01 | Phase 3 | Complete |
-| EXPORT-02 | Phase 3 | Pending |
-| EXPORT-03 | Phase 3 | Pending |
-| EXPORT-04 | Phase 3 | Pending |
+| EXPORT-02 | Phase 3 | Complete |
+| EXPORT-03 | Phase 3 | Complete |
+| EXPORT-04 | Phase 3 | Complete |
 | CLI-01 | Phase 3 | Complete |
 | CLI-02 | Phase 3 | Complete |
 | CLI-03 | Phase 3 | Complete |
