@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 3 of 3 (Search Filtering & Export)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In Progress
-Last activity: 2026-02-23 — Completed 03-02: ticket.rs filtering/export library layer (ListFilter, TicketExport, format_export_text)
+Last activity: 2026-02-23 — Completed 03-03: wire filter flags into List command and add Export match arm (plain-text + JSON)
 
-Progress: [███████░░░] 70%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 2 min
 - Total execution time: 0.20 hours
 
@@ -29,10 +29,10 @@ Progress: [███████░░░] 70%
 |-------|-------|-------|----------|
 | 01-foundation-core-operations | 3 | 5 min | 2 min |
 | 02-agent-coordination-dependencies | 4 | 10 min | 2 min |
-| 03-search-filtering-export | 2 | 37 min | 18 min |
+| 03-search-filtering-export | 3 | 38 min | 13 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (2 min), 02-04 (4 min), 03-01 (2 min), 03-02 (35 min)
+- Last 5 plans: 02-04 (4 min), 03-01 (2 min), 03-02 (35 min), 03-03 (1 min)
 - Trend: Consistent
 
 *Updated after each plan completion*
@@ -72,6 +72,8 @@ Recent decisions affecting current work:
 - [Phase 03-search-filtering-export]: Ticket struct gained claimed_by field: required for TicketExport to surface claimer without extra queries
 - [Phase 03-search-filtering-export]: Dynamic WHERE uses positional ? params (not named params): rusqlite named params incompatible with dynamic param counts
 - [Phase 03-search-filtering-export]: list_tickets refactored as wrapper over list_tickets_filtered with empty filter: eliminates code duplication
+- [Phase 03-03]: build_filter_from_export returns ListFilter (not Result<..>) while build_filter_from_list returns Result — both use process::exit(1) for mutual exclusion, consistent with existing Update handler pattern
+- [Phase 03-03]: Tasks 1 and 2 committed together since both exclusively modify src/lib.rs — splitting would leave non-compilable intermediate state
 
 ### Pending Todos
 
@@ -84,5 +86,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 03-02-PLAN.md
+Stopped at: Completed 03-03-PLAN.md
 Resume file: None
