@@ -63,13 +63,16 @@ Plans:
   1. User can filter tickets by status, claimed status, and claimer
   2. User can search tickets by name or description (substring match)
   3. User can combine multiple filters in single query
-  4. Short aliases work: 'new' creates, 'ls' lists, 'claim' claims tickets
-  5. Plain text export includes only essential fields (ID, name, description, dependencies)
+  4. Short aliases work: 'new' creates, 'ls' lists, 'dump' exports tickets
+  5. Plain text export includes only essential fields (ID, name, status, dependencies)
   6. JSON export option available for programmatic parsing
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] TBD after planning
+- [ ] 03-01-PLAN.md — Cargo serde deps + CLI aliases on all commands + ListArgs filter flags + ExportArgs struct
+- [ ] 03-02-PLAN.md — ticket.rs: ListFilter, list_tickets_filtered, TicketExport, format_export_text
+- [ ] 03-03-PLAN.md — lib.rs wiring: filter on List command, Export match arm (plain text + JSON)
+- [ ] 03-04-PLAN.md — Phase 3 integration tests (≥15 tests covering all filter and export behaviors)
 
 ## Progress
 
@@ -80,4 +83,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Foundation & Core Operations | 3/3 | Complete   | 2026-02-22 |
 | 2. Agent Coordination & Dependencies | 4/4 | Complete   | 2026-02-23 |
-| 3. Search, Filtering & Export | 0/TBD | Not started | - |
+| 3. Search, Filtering & Export | 0/4 | Not started | - |
