@@ -1,4 +1,5 @@
 use rusqlite::{Connection, TransactionBehavior};
+use serde::Serialize;
 use std::collections::{HashMap, HashSet};
 use thiserror::Error;
 
@@ -8,6 +9,7 @@ pub struct Ticket {
     pub name: String,
     pub description: String,
     pub status: String,
+    pub claimed_by: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -195,7 +197,7 @@ pub fn create_ticket(conn: &Connection, name: &str, desc: &str) -> Result<i64, A
 
 pub fn get_ticket(conn: &Connection, id: i64) -> Result<Ticket, AppError> {
     conn.query_row(
-        "SELECT id, name, description, status, created_at, updated_at
+        "SELECT id, name, description, status, claimed_by, created_at, updated_at
          FROM tickets WHERE id = ?1",
         rusqlite::params![id],
         |row| {
@@ -204,8 +206,9 @@ pub fn get_ticket(conn: &Connection, id: i64) -> Result<Ticket, AppError> {
                 name: row.get(1)?,
                 description: row.get(2)?,
                 status: row.get(3)?,
-                created_at: row.get(4)?,
-                updated_at: row.get(5)?,
+                claimed_by: row.get(4)?,
+                created_at: row.get(5)?,
+                updated_at: row.get(6)?,
             })
         },
     )
@@ -255,7 +258,7 @@ pub fn list_tickets_filtered(conn: &Connection, filter: &ListFilter) -> Result<V
     };
 
     let sql = format!(
-        "SELECT id, name, description, status, created_at, updated_at FROM tickets {} ORDER BY id ASC",
+        "SELECT id, name, description, status, claimed_by, created_at, updated_at FROM tickets {} ORDER BY id ASC",
         where_clause
     );
 
@@ -267,8 +270,9 @@ pub fn list_tickets_filtered(conn: &Connection, filter: &ListFilter) -> Result<V
             name: row.get(1)?,
             description: row.get(2)?,
             status: row.get(3)?,
-            created_at: row.get(4)?,
-            updated_at: row.get(5)?,
+            claimed_by: row.get(4)?,
+            created_at: row.get(5)?,
+            updated_at: row.get(6)?,
         })
     })?;
     rows.collect::<rusqlite::Result<Vec<_>>>().map_err(AppError::Db)
@@ -276,6 +280,49 @@ pub fn list_tickets_filtered(conn: &Connection, filter: &ListFilter) -> Result<V
 
 pub fn list_tickets(conn: &Connection) -> Result<Vec<Ticket>, AppError> {
     list_tickets_filtered(conn, &ListFilter { status: None, claimed: None, claimer: None, search: vec![] })
+}
+
+#[derive(Serialize)]
+pub struct TicketExport {
+    pub id: i64,
+    pub name: String,
+    pub description: String,
+    pub status: String,
+    pub claimed_by: Option<String>,
+    pub dependencies: Vec<i64>,
+}
+
+pub fn tickets_to_export(conn: &Connection, filter: &ListFilter) -> Result<Vec<TicketExport>, AppError> {
+    let tickets = list_tickets_filtered(conn, filter)?;
+    tickets
+        .into_iter()
+        .map(|t| {
+            let deps = list_deps(conn, t.id)?;
+            Ok(TicketExport {
+                id: t.id,
+                name: t.name,
+                description: t.description,
+                status: t.status,
+                claimed_by: t.claimed_by,
+                dependencies: deps.forward,
+            })
+        })
+        .collect()
+}
+
+pub fn format_export_text(t: &TicketExport) -> String {
+    let deps_suffix = if t.dependencies.is_empty() {
+        String::new()
+    } else {
+        let dep_ids = t
+            .dependencies
+            .iter()
+            .map(|d| format!("T-{}", d))
+            .collect::<Vec<_>>()
+            .join(",");
+        format!(" deps:{}", dep_ids)
+    };
+    format!("T-{} [{}] {}{}", t.id, t.status, t.name, deps_suffix)
 }
 
 pub fn delete_ticket(conn: &Connection, id: i64) -> Result<(), AppError> {
