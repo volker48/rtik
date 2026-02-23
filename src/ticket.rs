@@ -215,12 +215,53 @@ pub fn get_ticket(conn: &Connection, id: i64) -> Result<Ticket, AppError> {
     })
 }
 
-pub fn list_tickets(conn: &Connection) -> Result<Vec<Ticket>, AppError> {
-    let mut stmt = conn.prepare(
-        "SELECT id, name, description, status, created_at, updated_at
-         FROM tickets ORDER BY id ASC",
-    )?;
-    let rows = stmt.query_map([], |row| {
+pub struct ListFilter {
+    pub status: Option<String>,
+    /// None = no filter, Some(true) = claimed only, Some(false) = unclaimed only
+    pub claimed: Option<bool>,
+    pub claimer: Option<String>,
+    /// Each term must appear in name OR description (AND-composed across terms, case-insensitive)
+    pub search: Vec<String>,
+}
+
+pub fn list_tickets_filtered(conn: &Connection, filter: &ListFilter) -> Result<Vec<Ticket>, AppError> {
+    let mut conditions: Vec<String> = Vec::new();
+    let mut params: Vec<Box<dyn rusqlite::types::ToSql>> = Vec::new();
+
+    if let Some(ref s) = filter.status {
+        conditions.push("status = ?".to_string());
+        params.push(Box::new(s.clone()));
+    }
+    match filter.claimed {
+        Some(true) => conditions.push("claimed_by IS NOT NULL".to_string()),
+        Some(false) => conditions.push("claimed_by IS NULL".to_string()),
+        None => {}
+    }
+    if let Some(ref c) = filter.claimer {
+        conditions.push("claimed_by = ?".to_string());
+        params.push(Box::new(c.clone()));
+    }
+    for term in &filter.search {
+        conditions.push("(LOWER(name) LIKE ? OR LOWER(description) LIKE ?)".to_string());
+        let pattern = format!("%{}%", term.to_lowercase());
+        params.push(Box::new(pattern.clone()));
+        params.push(Box::new(pattern));
+    }
+
+    let where_clause = if conditions.is_empty() {
+        String::new()
+    } else {
+        format!("WHERE {}", conditions.join(" AND "))
+    };
+
+    let sql = format!(
+        "SELECT id, name, description, status, created_at, updated_at FROM tickets {} ORDER BY id ASC",
+        where_clause
+    );
+
+    let param_refs: Vec<&dyn rusqlite::types::ToSql> = params.iter().map(|p| p.as_ref()).collect();
+    let mut stmt = conn.prepare(&sql)?;
+    let rows = stmt.query_map(param_refs.as_slice(), |row| {
         Ok(Ticket {
             id: row.get(0)?,
             name: row.get(1)?,
@@ -231,6 +272,10 @@ pub fn list_tickets(conn: &Connection) -> Result<Vec<Ticket>, AppError> {
         })
     })?;
     rows.collect::<rusqlite::Result<Vec<_>>>().map_err(AppError::Db)
+}
+
+pub fn list_tickets(conn: &Connection) -> Result<Vec<Ticket>, AppError> {
+    list_tickets_filtered(conn, &ListFilter { status: None, claimed: None, claimer: None, search: vec![] })
 }
 
 pub fn delete_ticket(conn: &Connection, id: i64) -> Result<(), AppError> {
