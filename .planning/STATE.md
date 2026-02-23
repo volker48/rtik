@@ -5,32 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Agents never lose track of work when context resets - persistent, queryable task state that survives session restarts and enables multi-agent coordination.
-**Current focus:** Phase 1: Foundation & Core Operations
+**Current focus:** Phase 2: Agent Coordination & Dependencies
 
 ## Current Position
 
-Phase: 1 of 3 (Foundation & Core Operations)
-Plan: 3 of 3 in current phase
-Status: Phase 1 Complete
-Last activity: 2026-02-22 — Completed 01-03: Integration tests + release verification
+Phase: 2 of 3 (Agent Coordination & Dependencies)
+Plan: 1 of 4 in current phase
+Status: In Progress
+Last activity: 2026-02-23 — Completed 02-01: Schema evolution M2 migration
 
 Progress: [████░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
+- Total plans completed: 4
 - Average duration: 2 min
-- Total execution time: 0.08 hours
+- Total execution time: 0.09 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-core-operations | 3 | 5 min | 2 min |
+| 02-agent-coordination-dependencies | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2 min), 01-02 (2 min), 01-03 (1 min)
+- Last 5 plans: 01-01 (2 min), 01-02 (2 min), 01-03 (1 min), 02-01 (2 min)
 - Trend: Consistent
 
 *Updated after each plan completion*
@@ -55,6 +56,8 @@ Recent decisions affecting current work:
 - normalize_status as Option<String> declared before params Vec to ensure lifetime outlives the borrow
 - Fetch ticket before delete to include name in confirmation output
 - [Phase 01-foundation-core-operations]: tempfile::NamedTempFile + into_temp_path() for test isolation: keeps file alive alongside Connection for full test scope
+- [Phase 02-01]: Combine all M2 migration steps into single M::up string for atomicity (table rebuild + ticket_deps creation)
+- [Phase 02-01]: wip completely removed — in-progress is the canonical in-flight status as locked by CONTEXT.md
 
 ### Pending Todos
 
@@ -66,6 +69,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-22
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-02-23
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None

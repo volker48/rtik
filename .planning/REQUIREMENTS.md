@@ -20,12 +20,12 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **STATE-01**: Ticket has status field with values: todo, WIP, blocked, done
 - [x] **STATE-02**: Ticket automatically tracks created_at timestamp on creation
 - [x] **STATE-03**: Ticket automatically updates updated_at timestamp on modification
-- [ ] **STATE-04**: Status transitions are validated (e.g., cannot go from done to todo)
+- [x] **STATE-04**: Status transitions are validated (e.g., cannot go from done to todo)
 - [x] **STATE-05**: Ticket has unique auto-incrementing ID
 
 ### Agent Coordination
 
-- [ ] **COORD-01**: Agent can claim ticket (sets claimed_by field)
+- [x] **COORD-01**: Agent can claim ticket (sets claimed_by field)
 - [ ] **COORD-02**: Claimed ticket records claimed_at timestamp
 - [ ] **COORD-03**: Agent can release/unclaim ticket (allows reassignment)
 - [ ] **COORD-04**: User can add dependency between tickets (ticket A depends on ticket B)
@@ -122,9 +122,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STATE-01 | Phase 1 | Complete |
 | STATE-02 | Phase 1 | Complete |
 | STATE-03 | Phase 1 | Complete |
-| STATE-04 | Phase 2 | Pending |
+| STATE-04 | Phase 2 | Complete |
 | STATE-05 | Phase 1 | Complete (01-01) |
-| COORD-01 | Phase 2 | Pending |
+| COORD-01 | Phase 2 | Complete |
 | COORD-02 | Phase 2 | Pending |
 | COORD-03 | Phase 2 | Pending |
 | COORD-04 | Phase 2 | Pending |
