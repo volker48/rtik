@@ -135,6 +135,10 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
                 }
             }
         }
+        Commands::Export(_args) => {
+            eprintln!("export: not yet implemented");
+            std::process::exit(1);
+        }
     }
     Ok(())
 }

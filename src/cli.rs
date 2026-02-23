@@ -10,25 +10,36 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Commands {
     /// Create a new ticket
+    #[command(alias = "new")]
     Create(CreateArgs),
     /// Show ticket details
+    #[command(alias = "get")]
     Get { id: i64 },
     /// Update ticket fields (at least one required)
+    #[command(alias = "up")]
     Update(UpdateArgs),
     /// Delete a ticket
+    #[command(alias = "rm")]
     Delete { id: i64 },
     /// List all tickets
+    #[command(alias = "ls")]
     List(ListArgs),
     /// Claim a ticket for this agent
     Claim(ClaimArgs),
     /// Release a claimed ticket
+    #[command(alias = "rel")]
     Release(ReleaseArgs),
     /// Block a ticket with a reason
     Block(BlockArgs),
     /// Manage ticket dependencies (add/remove)
+    #[command(alias = "dep")]
     Dep(DepArgs),
     /// Show dependency tree for a ticket
+    #[command(alias = "deps")]
     Deps(DepsArgs),
+    /// Export tickets as text or JSON
+    #[command(alias = "dump")]
+    Export(ExportArgs),
 }
 
 #[derive(Args)]
@@ -55,6 +66,32 @@ pub struct ListArgs {
     /// Show created/updated timestamps
     #[arg(long)]
     pub timestamps: bool,
+    #[arg(long, help = "Filter by status (passes through to DB; returns empty if invalid)")]
+    pub status: Option<String>,
+    #[arg(long, help = "Show only claimed tickets")]
+    pub claimed: bool,
+    #[arg(long, help = "Show only unclaimed tickets")]
+    pub unclaimed: bool,
+    #[arg(long, help = "Filter by claimer name (exact match)")]
+    pub claimer: Option<String>,
+    #[arg(long = "search", help = "Substring search in name+description (repeatable, all terms must match)")]
+    pub search: Vec<String>,
+}
+
+#[derive(Args)]
+pub struct ExportArgs {
+    #[arg(long, help = "Filter by status")]
+    pub status: Option<String>,
+    #[arg(long, help = "Show only claimed tickets")]
+    pub claimed: bool,
+    #[arg(long, help = "Show only unclaimed tickets")]
+    pub unclaimed: bool,
+    #[arg(long, help = "Filter by claimer name")]
+    pub claimer: Option<String>,
+    #[arg(long = "search", help = "Substring search in name+description (repeatable)")]
+    pub search: Vec<String>,
+    #[arg(long, help = "Output as JSON array instead of plain text")]
+    pub json: bool,
 }
 
 #[derive(Args)]
