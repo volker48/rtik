@@ -1,4 +1,4 @@
-use rusqlite::Connection;
+use rusqlite::{Connection, TransactionBehavior};
 use thiserror::Error;
 
 #[derive(Debug)]
@@ -19,8 +19,165 @@ pub enum AppError {
     NoUpdateFields,
     #[error("invalid status '{0}': must be one of todo, in-progress, blocked, done")]
     InvalidStatus(String),
+    #[error("ticket #{0} already claimed by {1} since {2}")]
+    AlreadyClaimed(i64, String, String),
+    #[error("from {from}, valid transitions are: {valid}")]
+    InvalidTransition { from: String, valid: String },
+    #[error("block reason is required")]
+    BlockReasonRequired,
+    #[error("ticket #{0} not claimed by you ({1})")]
+    NotOwner(i64, String),
+    #[error("ticket #{0} is not currently claimed")]
+    NotClaimed(i64),
+    #[error("RTIK_AGENT not set — set it to identify this agent")]
+    AgentNotSet,
     #[error(transparent)]
     Db(#[from] rusqlite::Error),
+}
+
+pub fn validate_transition(from: &str, to: &str) -> Result<(), AppError> {
+    let allowed: &[&str] = match from {
+        "todo" => &["in-progress", "blocked"],
+        "in-progress" => &["done", "blocked", "todo"],
+        "blocked" => &["in-progress", "todo"],
+        "done" => &["in-progress"],
+        _ => &[],
+    };
+    if allowed.contains(&to) {
+        Ok(())
+    } else {
+        Err(AppError::InvalidTransition {
+            from: from.to_string(),
+            valid: allowed.join(", "),
+        })
+    }
+}
+
+pub fn claim_ticket(conn: &mut Connection, id: i64, agent: &str, force: bool) -> Result<(), AppError> {
+    let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
+
+    // Check unmet deps and warn.
+    let unmet_count: i64 = tx.query_row(
+        "SELECT COUNT(*) FROM ticket_deps td
+         JOIN tickets dep ON dep.id = td.depends_on
+         WHERE td.ticket_id = ?1 AND dep.status != 'done'",
+        rusqlite::params![id],
+        |row| row.get(0),
+    )?;
+    if unmet_count > 0 {
+        eprintln!("Warning: {} dependencies not done", unmet_count);
+    }
+
+    let now = chrono_free_utc_now();
+    if force {
+        let existing: Option<String> = tx
+            .query_row(
+                "SELECT claimed_by FROM tickets WHERE id = ?1",
+                rusqlite::params![id],
+                |row| row.get(0),
+            )
+            .map_err(|e| match e {
+                rusqlite::Error::QueryReturnedNoRows => AppError::NotFound(id),
+                other => AppError::Db(other),
+            })?;
+        if let Some(ref owner) = existing {
+            if owner != agent {
+                eprintln!("Warning: overriding claim by {}", owner);
+            }
+        }
+        tx.execute(
+            "UPDATE tickets SET claimed_by = ?1, claimed_at = ?2, status = 'in-progress', updated_at = ?2 WHERE id = ?3",
+            rusqlite::params![agent, now, id],
+        )?;
+    } else {
+        let affected = tx.execute(
+            "UPDATE tickets SET claimed_by = ?1, claimed_at = ?2, status = 'in-progress', updated_at = ?2 WHERE id = ?3 AND claimed_by IS NULL",
+            rusqlite::params![agent, now, id],
+        )?;
+        if affected == 0 {
+            let result: rusqlite::Result<(Option<String>, Option<String>)> = tx.query_row(
+                "SELECT claimed_by, claimed_at FROM tickets WHERE id = ?1",
+                rusqlite::params![id],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            );
+            match result {
+                Err(rusqlite::Error::QueryReturnedNoRows) => return Err(AppError::NotFound(id)),
+                Err(e) => return Err(AppError::Db(e)),
+                Ok((Some(owner), claimed_at)) => {
+                    let at = claimed_at.unwrap_or_default();
+                    return Err(AppError::AlreadyClaimed(id, owner, at));
+                }
+                Ok((None, _)) => {
+                    // Ticket exists but unclaimed — shouldn't happen, but handle gracefully.
+                    return Err(AppError::NotFound(id));
+                }
+            }
+        }
+    }
+
+    tx.commit()?;
+    Ok(())
+}
+
+pub fn release_ticket(conn: &mut Connection, id: i64, agent: &str, force: bool) -> Result<(), AppError> {
+    let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
+
+    let result: rusqlite::Result<Option<String>> = tx.query_row(
+        "SELECT claimed_by FROM tickets WHERE id = ?1",
+        rusqlite::params![id],
+        |row| row.get(0),
+    );
+    let claimed_by = match result {
+        Err(rusqlite::Error::QueryReturnedNoRows) => return Err(AppError::NotFound(id)),
+        Err(e) => return Err(AppError::Db(e)),
+        Ok(val) => val,
+    };
+
+    if force {
+        if let Some(ref owner) = claimed_by {
+            if owner != agent {
+                eprintln!("Warning: overriding claim by {}", owner);
+            }
+        }
+    } else {
+        match &claimed_by {
+            None => return Err(AppError::NotClaimed(id)),
+            Some(owner) if owner != agent => return Err(AppError::NotOwner(id, agent.to_string())),
+            _ => {}
+        }
+    }
+
+    let now = chrono_free_utc_now();
+    tx.execute(
+        "UPDATE tickets SET claimed_by = NULL, claimed_at = NULL, status = 'todo', updated_at = ?1 WHERE id = ?2",
+        rusqlite::params![now, id],
+    )?;
+
+    tx.commit()?;
+    Ok(())
+}
+
+pub fn block_ticket(conn: &Connection, id: i64, reason: &str) -> Result<String, AppError> {
+    let (current_status, name): (String, String) = conn
+        .query_row(
+            "SELECT status, name FROM tickets WHERE id = ?1",
+            rusqlite::params![id],
+            |row| Ok((row.get(0)?, row.get(1)?)),
+        )
+        .map_err(|e| match e {
+            rusqlite::Error::QueryReturnedNoRows => AppError::NotFound(id),
+            other => AppError::Db(other),
+        })?;
+
+    validate_transition(&current_status, "blocked")?;
+
+    let now = chrono_free_utc_now();
+    conn.execute(
+        "UPDATE tickets SET status = 'blocked', block_reason = ?1, updated_at = ?2 WHERE id = ?3",
+        rusqlite::params![reason, now, id],
+    )?;
+
+    Ok(name)
 }
 
 pub fn create_ticket(conn: &Connection, name: &str, desc: &str) -> Result<i64, AppError> {
@@ -92,6 +249,21 @@ pub fn update_ticket(
     // Normalize status outside any if-let so the String lives long enough for params.
     let normalized_status: Option<String> = status.map(|s| s.to_lowercase());
 
+    // Validate transition before building SET clause.
+    if let Some(ref ns) = normalized_status {
+        let current_status: String = conn
+            .query_row(
+                "SELECT status FROM tickets WHERE id = ?1",
+                rusqlite::params![id],
+                |row| row.get(0),
+            )
+            .map_err(|e| match e {
+                rusqlite::Error::QueryReturnedNoRows => AppError::NotFound(id),
+                other => AppError::Db(other),
+            })?;
+        validate_transition(&current_status, ns)?;
+    }
+
     let mut sets: Vec<&str> = Vec::new();
     let mut params: Vec<(&str, &dyn rusqlite::types::ToSql)> = Vec::new();
 
@@ -106,6 +278,12 @@ pub fn update_ticket(
     if let Some(ref ns) = normalized_status {
         sets.push("status = :status");
         params.push((":status", ns));
+        if ns == "done" {
+            sets.push("claimed_by = :claimnil");
+            sets.push("claimed_at = :claimnil_at");
+            params.push((":claimnil", &rusqlite::types::Null));
+            params.push((":claimnil_at", &rusqlite::types::Null));
+        }
     }
     sets.push("updated_at = :now");
     params.push((":now", &now));
