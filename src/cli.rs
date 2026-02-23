@@ -25,6 +25,10 @@ pub enum Commands {
     Release(ReleaseArgs),
     /// Block a ticket with a reason
     Block(BlockArgs),
+    /// Manage ticket dependencies (add/remove)
+    Dep(DepArgs),
+    /// Show dependency tree for a ticket
+    Deps(DepsArgs),
 }
 
 #[derive(Args)]
@@ -71,6 +75,25 @@ pub struct ReleaseArgs {
 pub struct BlockArgs {
     pub id: i64,
     pub reason: String,
+}
+
+#[derive(Args)]
+pub struct DepArgs {
+    #[command(subcommand)]
+    pub action: DepAction,
+}
+
+#[derive(Subcommand)]
+pub enum DepAction {
+    /// Add a dependency: ticket_id depends on dep_id
+    Add { ticket_id: i64, dep_id: i64 },
+    /// Remove a dependency
+    Remove { ticket_id: i64, dep_id: i64 },
+}
+
+#[derive(Args)]
+pub struct DepsArgs {
+    pub id: i64,
 }
 
 pub fn parse_status(raw: &str) -> Result<String, String> {

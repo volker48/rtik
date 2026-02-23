@@ -27,6 +27,15 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
                 println!("{}", t.description);
             }
             println!("Created: {} | Updated: {}", created_date, updated_date);
+            let deps = ticket::list_deps(&conn, id)?;
+            if !deps.forward.is_empty() {
+                let fwd = deps.forward.iter().map(|i| format!("#{}", i)).collect::<Vec<_>>().join(", ");
+                println!("Depends on: {}", fwd);
+            }
+            if !deps.reverse.is_empty() {
+                let rev = deps.reverse.iter().map(|i| format!("#{}", i)).collect::<Vec<_>>().join(", ");
+                println!("Required by: {}", rev);
+            }
         }
         Commands::Update(args) => {
             let name = args.name.as_deref();
@@ -50,6 +59,7 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
                 println!("No tickets.");
                 return Ok(());
             }
+            let dep_counts = load_dep_counts(&conn)?;
             if args.timestamps {
                 println!(
                     "{:>4}  {:<9}  {:<40}  {:<10}  {:<10}",
@@ -57,7 +67,7 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
                 );
                 println!("{}", "-".repeat(80));
                 for t in &tickets {
-                    let name = truncate_name(&t.name, 40);
+                    let name = format_name_with_deps(&t.name, dep_counts.get(&t.id).copied());
                     let created = t.created_at.split('T').next().unwrap_or("");
                     let updated = t.updated_at.split('T').next().unwrap_or("");
                     println!(
@@ -69,7 +79,7 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
                 println!("{:>4}  {:<9}  {}", "ID", "STATUS", "NAME");
                 println!("{}", "-".repeat(60));
                 for t in &tickets {
-                    let name = truncate_name(&t.name, 40);
+                    let name = format_name_with_deps(&t.name, dep_counts.get(&t.id).copied());
                     println!("{:>4}  {:<9}  {}", t.id, t.status, name);
                 }
             }
@@ -88,6 +98,43 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
             let name = ticket::block_ticket(&conn, args.id, &args.reason)?;
             println!("Blocked: #{} {}", args.id, name);
         }
+        Commands::Dep(args) => {
+            match args.action {
+                cli::DepAction::Add { ticket_id, dep_id } => {
+                    ticket::add_dep(&conn, ticket_id, dep_id)?;
+                    println!("Added: #{} depends on #{}", ticket_id, dep_id);
+                }
+                cli::DepAction::Remove { ticket_id, dep_id } => {
+                    ticket::remove_dep(&conn, ticket_id, dep_id)?;
+                    println!("Removed: #{} no longer depends on #{}", ticket_id, dep_id);
+                }
+            }
+        }
+        Commands::Deps(args) => {
+            let deps = ticket::list_deps(&conn, args.id)?;
+            if deps.forward.is_empty() && deps.reverse.is_empty() {
+                println!("#{} has no dependencies.", args.id);
+            } else {
+                if !deps.forward.is_empty() {
+                    let fwd = deps
+                        .forward
+                        .iter()
+                        .map(|i| format!("#{}", i))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    println!("Depends on: {}", fwd);
+                }
+                if !deps.reverse.is_empty() {
+                    let rev = deps
+                        .reverse
+                        .iter()
+                        .map(|i| format!("#{}", i))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    println!("Required by: {}", rev);
+                }
+            }
+        }
     }
     Ok(())
 }
@@ -98,4 +145,28 @@ fn truncate_name(name: &str, max_len: usize) -> String {
     } else {
         name.to_string()
     }
+}
+
+fn format_name_with_deps(name: &str, dep_count: Option<i64>) -> String {
+    match dep_count {
+        Some(n) if n > 0 => {
+            let suffix = format!(" [{} dep{}]", n, if n == 1 { "" } else { "s" });
+            let truncated = truncate_name(name, 35);
+            format!("{}{}", truncated, suffix)
+        }
+        _ => truncate_name(name, 40),
+    }
+}
+
+fn load_dep_counts(conn: &Connection) -> Result<std::collections::HashMap<i64, i64>, ticket::AppError> {
+    let mut stmt = conn.prepare(
+        "SELECT ticket_id, COUNT(*) FROM ticket_deps GROUP BY ticket_id",
+    )?;
+    let rows = stmt.query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, i64>(1)?)))?;
+    let mut map = std::collections::HashMap::new();
+    for row in rows {
+        let (id, count) = row?;
+        map.insert(id, count);
+    }
+    Ok(map)
 }
