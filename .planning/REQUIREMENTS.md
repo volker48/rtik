@@ -28,9 +28,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **COORD-01**: Agent can claim ticket (sets claimed_by field)
 - [x] **COORD-02**: Claimed ticket records claimed_at timestamp
 - [x] **COORD-03**: Agent can release/unclaim ticket (allows reassignment)
-- [ ] **COORD-04**: User can add dependency between tickets (ticket A depends on ticket B)
-- [ ] **COORD-05**: User can remove dependency between tickets
-- [ ] **COORD-06**: System detects and rejects circular dependencies
+- [x] **COORD-04**: User can add dependency between tickets (ticket A depends on ticket B)
+- [x] **COORD-05**: User can remove dependency between tickets
+- [x] **COORD-06**: System detects and rejects circular dependencies
 
 ### Query & Search
 
@@ -127,9 +127,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COORD-01 | Phase 2 | Complete |
 | COORD-02 | Phase 2 | Complete |
 | COORD-03 | Phase 2 | Complete |
-| COORD-04 | Phase 2 | Pending |
-| COORD-05 | Phase 2 | Pending |
-| COORD-06 | Phase 2 | Pending |
+| COORD-04 | Phase 2 | Complete |
+| COORD-05 | Phase 2 | Complete |
+| COORD-06 | Phase 2 | Complete |
 | QUERY-01 | Phase 3 | Pending |
 | QUERY-02 | Phase 3 | Pending |
 | QUERY-03 | Phase 3 | Pending |

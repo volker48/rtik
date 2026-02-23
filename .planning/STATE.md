@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-22)
 ## Current Position
 
 Phase: 2 of 3 (Agent Coordination & Dependencies)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In Progress
-Last activity: 2026-02-23 — Completed 02-02: Atomic claiming and status state machine
+Last activity: 2026-02-23 — Completed 02-03: Dependency management with cycle detection
 
-Progress: [████░░░░░░] 33%
+Progress: [█████░░░░░] 42%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 2 min
-- Total execution time: 0.10 hours
+- Total execution time: 0.13 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-core-operations | 3 | 5 min | 2 min |
-| 02-agent-coordination-dependencies | 2 | 4 min | 2 min |
+| 02-agent-coordination-dependencies | 3 | 6 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (2 min), 01-03 (1 min), 02-01 (2 min), 02-02 (2 min)
+- Last 5 plans: 01-03 (1 min), 02-01 (2 min), 02-02 (2 min), 02-03 (2 min)
 - Trend: Consistent
 
 *Updated after each plan completion*
@@ -61,6 +61,9 @@ Recent decisions affecting current work:
 - [Phase 02]: Use named struct variant for InvalidTransition (thiserror cannot call .join() on positional tuple args)
 - [Phase 02]: conn shadowed as mut inside run() rather than changing public signature — avoids touching main.rs
 - [Phase 02]: validate_transition called in update_ticket with pre-fetch of current status (one extra query per status change)
+- [Phase 02-03]: Self-dependency pre-checked in add_dep to return CyclicDependency error rather than DB constraint error
+- [Phase 02-03]: would_create_cycle loads full ticket_deps adjacency list into memory for DFS — no new crate needed
+- [Phase 02-03]: Deps (plural, read-only) is separate top-level command from Dep (singular, mutation subcommand)
 
 ### Pending Todos
 
@@ -73,5 +76,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 02-02-PLAN.md
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
