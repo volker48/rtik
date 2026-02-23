@@ -47,10 +47,13 @@ Plans:
   4. User can add dependency between tickets, see dependency count in lists
   5. System rejects circular dependencies with clear error message
   6. Status transitions validate state machine (cannot go from done to todo)
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] TBD after planning
+- [ ] 02-01-PLAN.md — Schema migration M2 (wip→in-progress rename, add claimed_by/claimed_at/block_reason columns, ticket_deps table)
+- [ ] 02-02-PLAN.md — Claim, release, block commands + status state machine enforcement
+- [ ] 02-03-PLAN.md — Dependency management (add/remove/cycle detection/display in get+list)
+- [ ] 02-04-PLAN.md — Phase 2 integration tests (≥17 tests covering all coordination behaviors)
 
 ### Phase 3: Search, Filtering & Export
 **Goal**: Agents efficiently discover relevant work and export context in token-optimized formats
@@ -76,5 +79,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Core Operations | 3/3 | Complete   | 2026-02-22 |
-| 2. Agent Coordination & Dependencies | 0/TBD | Not started | - |
+| 2. Agent Coordination & Dependencies | 0/4 | Not started | - |
 | 3. Search, Filtering & Export | 0/TBD | Not started | - |
