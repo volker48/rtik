@@ -50,9 +50,9 @@ pub struct ListArgs {
 pub fn parse_status(raw: &str) -> Result<String, String> {
     let normalized = raw.to_lowercase();
     match normalized.as_str() {
-        "todo" | "wip" | "blocked" | "done" => Ok(normalized),
+        "todo" | "in-progress" | "blocked" | "done" => Ok(normalized),
         _ => Err(format!(
-            "invalid status '{}': must be one of todo, wip, blocked, done",
+            "invalid status '{}': must be one of todo, in-progress, blocked, done",
             raw
         )),
     }

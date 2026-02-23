@@ -17,7 +17,7 @@ pub enum AppError {
     NotFound(i64),
     #[error("no fields provided — use --name, --desc, or --status")]
     NoUpdateFields,
-    #[error("invalid status '{0}': must be one of todo, wip, blocked, done")]
+    #[error("invalid status '{0}': must be one of todo, in-progress, blocked, done")]
     InvalidStatus(String),
     #[error(transparent)]
     Db(#[from] rusqlite::Error),

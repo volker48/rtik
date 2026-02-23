@@ -73,9 +73,9 @@ fn list_tickets_sorted_by_id() {
 fn update_ticket_status_normalized_to_lowercase() {
     let (conn, _tmp) = open_test_db();
     let id = ticket::create_ticket(&conn, "Task", "").unwrap();
-    ticket::update_ticket(&conn, id, None, None, Some("WIP")).unwrap();
+    ticket::update_ticket(&conn, id, None, None, Some("IN-PROGRESS")).unwrap();
     let t = ticket::get_ticket(&conn, id).unwrap();
-    assert_eq!(t.status, "wip");
+    assert_eq!(t.status, "in-progress");
 }
 
 #[test]
