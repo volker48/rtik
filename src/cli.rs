@@ -19,6 +19,12 @@ pub enum Commands {
     Delete { id: i64 },
     /// List all tickets
     List(ListArgs),
+    /// Claim a ticket for this agent
+    Claim(ClaimArgs),
+    /// Release a claimed ticket
+    Release(ReleaseArgs),
+    /// Block a ticket with a reason
+    Block(BlockArgs),
 }
 
 #[derive(Args)]
@@ -45,6 +51,26 @@ pub struct ListArgs {
     /// Show created/updated timestamps
     #[arg(long)]
     pub timestamps: bool,
+}
+
+#[derive(Args)]
+pub struct ClaimArgs {
+    pub id: i64,
+    #[arg(long, help = "Override another agent's claim")]
+    pub force: bool,
+}
+
+#[derive(Args)]
+pub struct ReleaseArgs {
+    pub id: i64,
+    #[arg(long, help = "Release regardless of ownership")]
+    pub force: bool,
+}
+
+#[derive(Args)]
+pub struct BlockArgs {
+    pub id: i64,
+    pub reason: String,
 }
 
 pub fn parse_status(raw: &str) -> Result<String, String> {

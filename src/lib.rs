@@ -5,7 +5,12 @@ pub mod ticket;
 use rusqlite::Connection;
 use ticket::AppError;
 
+fn resolve_agent() -> Result<String, AppError> {
+    std::env::var("RTIK_AGENT").map_err(|_| AppError::AgentNotSet)
+}
+
 pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
+    let mut conn = conn;
     use cli::Commands;
     match cli.command {
         Commands::Create(args) => {
@@ -68,6 +73,20 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
                     println!("{:>4}  {:<9}  {}", t.id, t.status, name);
                 }
             }
+        }
+        Commands::Claim(args) => {
+            let agent = resolve_agent()?;
+            ticket::claim_ticket(&mut conn, args.id, &agent, args.force)?;
+            println!("Claimed #{}", args.id);
+        }
+        Commands::Release(args) => {
+            let agent = resolve_agent()?;
+            ticket::release_ticket(&mut conn, args.id, &agent, args.force)?;
+            println!("Released #{}", args.id);
+        }
+        Commands::Block(args) => {
+            let name = ticket::block_ticket(&conn, args.id, &args.reason)?;
+            println!("Blocked: #{} {}", args.id, name);
         }
     }
     Ok(())
