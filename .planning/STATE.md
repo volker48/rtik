@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-22)
 
 **Core value:** Agents never lose track of work when context resets - persistent, queryable task state that survives session restarts and enables multi-agent coordination.
-**Current focus:** Phase 2: Agent Coordination & Dependencies
+**Current focus:** Phase 3: Search Filtering & Export
 
 ## Current Position
 
-Phase: 2 of 3 (Agent Coordination & Dependencies)
-Plan: 4 of 4 in current phase
-Status: Phase Complete
-Last activity: 2026-02-23 — Completed 02-04: Phase 2 integration tests (33 tests, all passing)
+Phase: 3 of 3 (Search Filtering & Export)
+Plan: 1 of 3 in current phase
+Status: In Progress
+Last activity: 2026-02-23 — Completed 03-01: CLI surface (aliases, filter flags, ExportArgs, serde deps)
 
-Progress: [██████░░░░] 58%
+Progress: [███████░░░] 70%
 
 ## Performance Metrics
 
@@ -29,9 +29,10 @@ Progress: [██████░░░░] 58%
 |-------|-------|-------|----------|
 | 01-foundation-core-operations | 3 | 5 min | 2 min |
 | 02-agent-coordination-dependencies | 4 | 10 min | 2 min |
+| 03-search-filtering-export | 1 | 2 min | 2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (1 min), 02-01 (2 min), 02-02 (2 min), 02-03 (2 min), 02-04 (4 min)
+- Last 5 plans: 02-02 (2 min), 02-03 (2 min), 02-04 (4 min), 03-01 (2 min)
 - Trend: Consistent
 
 *Updated after each plan completion*
@@ -65,6 +66,9 @@ Recent decisions affecting current work:
 - [Phase 02-03]: would_create_cycle loads full ticket_deps adjacency list into memory for DFS — no new crate needed
 - [Phase 02-03]: Deps (plural, read-only) is separate top-level command from Dep (singular, mutation subcommand)
 - [Phase 02-04]: Concurrent claim atomicity tested via two Connection objects to same TempPath, not threads — tests SQL predicate without threading complexity
+- [Phase 03-01]: ListArgs --status has no value_parser — accepts any string, invalid values return empty results (locked decision)
+- [Phase 03-01]: Commands::Export stub match arm added to lib.rs to keep compilation clean before logic wired in Plans 02/03
+- [Phase 03-01]: Block and Claim commands have no aliases — not in the locked alias set from CONTEXT.md
 
 ### Pending Todos
 
@@ -77,5 +81,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 02-04-PLAN.md (Phase 2 complete)
+Stopped at: Completed 03-01-PLAN.md
 Resume file: None

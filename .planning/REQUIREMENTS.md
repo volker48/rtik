@@ -34,25 +34,25 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Query & Search
 
-- [ ] **QUERY-01**: User can filter tickets by status
-- [ ] **QUERY-02**: User can filter tickets by claimed status (claimed vs unclaimed)
-- [ ] **QUERY-03**: User can filter tickets by claimer (claimed_by value)
-- [ ] **QUERY-04**: User can search tickets by name (substring match)
-- [ ] **QUERY-05**: User can search tickets by description (substring match)
-- [ ] **QUERY-06**: User can combine multiple filters in single query
+- [x] **QUERY-01**: User can filter tickets by status
+- [x] **QUERY-02**: User can filter tickets by claimed status (claimed vs unclaimed)
+- [x] **QUERY-03**: User can filter tickets by claimer (claimed_by value)
+- [x] **QUERY-04**: User can search tickets by name (substring match)
+- [x] **QUERY-05**: User can search tickets by description (substring match)
+- [x] **QUERY-06**: User can combine multiple filters in single query
 
 ### Export
 
-- [ ] **EXPORT-01**: User can export tickets to plain text format
+- [x] **EXPORT-01**: User can export tickets to plain text format
 - [ ] **EXPORT-02**: Plain text export includes: ID, name, description, dependencies
 - [ ] **EXPORT-03**: Plain text export is token-efficient (minimal verbosity)
 - [ ] **EXPORT-04**: User can export tickets to JSON format
 
 ### CLI Interface
 
-- [ ] **CLI-01**: CLI provides short alias 'new' for create command
-- [ ] **CLI-02**: CLI provides short alias 'ls' for list command
-- [ ] **CLI-03**: CLI provides short alias 'claim' for claim command
+- [x] **CLI-01**: CLI provides short alias 'new' for create command
+- [x] **CLI-02**: CLI provides short alias 'ls' for list command
+- [x] **CLI-03**: CLI provides short alias 'claim' for claim command
 - [x] **CLI-04**: CLI provides helpful error messages with context
 - [x] **CLI-05**: CLI exits with standard codes (0=success, 1=error, 2=usage)
 - [x] **CLI-06**: CLI handles broken pipe gracefully (piping to head/grep)
@@ -130,19 +130,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COORD-04 | Phase 2 | Complete |
 | COORD-05 | Phase 2 | Complete |
 | COORD-06 | Phase 2 | Complete |
-| QUERY-01 | Phase 3 | Pending |
-| QUERY-02 | Phase 3 | Pending |
-| QUERY-03 | Phase 3 | Pending |
-| QUERY-04 | Phase 3 | Pending |
-| QUERY-05 | Phase 3 | Pending |
-| QUERY-06 | Phase 3 | Pending |
-| EXPORT-01 | Phase 3 | Pending |
+| QUERY-01 | Phase 3 | Complete |
+| QUERY-02 | Phase 3 | Complete |
+| QUERY-03 | Phase 3 | Complete |
+| QUERY-04 | Phase 3 | Complete |
+| QUERY-05 | Phase 3 | Complete |
+| QUERY-06 | Phase 3 | Complete |
+| EXPORT-01 | Phase 3 | Complete |
 | EXPORT-02 | Phase 3 | Pending |
 | EXPORT-03 | Phase 3 | Pending |
 | EXPORT-04 | Phase 3 | Pending |
-| CLI-01 | Phase 3 | Pending |
-| CLI-02 | Phase 3 | Pending |
-| CLI-03 | Phase 3 | Pending |
+| CLI-01 | Phase 3 | Complete |
+| CLI-02 | Phase 3 | Complete |
+| CLI-03 | Phase 3 | Complete |
 | CLI-04 | Phase 1 | Complete |
 | CLI-05 | Phase 1 | Complete (01-01) |
 | CLI-06 | Phase 1 | Complete (01-01) |
