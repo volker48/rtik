@@ -2,10 +2,10 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-22)
+See: .planning/PROJECT.md (updated 2026-02-24)
 
-**Core value:** Agents never lose track of work when context resets - persistent, queryable task state that survives session restarts and enables multi-agent coordination.
-**Current focus:** Phase 3: Search Filtering & Export
+**Core value:** Agents never lose track of work when context resets — persistent, queryable task state that survives session restarts and enables multi-agent coordination.
+**Current focus:** Planning next milestone (v1.1)
 
 ## Current Position
 
