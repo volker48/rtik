@@ -66,7 +66,10 @@ pub struct ListArgs {
     /// Show created/updated timestamps
     #[arg(long)]
     pub timestamps: bool,
-    #[arg(long, help = "Filter by status (passes through to DB; returns empty if invalid)")]
+    #[arg(
+        long,
+        help = "Filter by status (passes through to DB; returns empty if invalid)"
+    )]
     pub status: Option<String>,
     #[arg(long, help = "Show only claimed tickets")]
     pub claimed: bool,
@@ -74,7 +77,10 @@ pub struct ListArgs {
     pub unclaimed: bool,
     #[arg(long, help = "Filter by claimer name (exact match)")]
     pub claimer: Option<String>,
-    #[arg(long = "search", help = "Substring search in name+description (repeatable, all terms must match)")]
+    #[arg(
+        long = "search",
+        help = "Substring search in name+description (repeatable, all terms must match)"
+    )]
     pub search: Vec<String>,
 }
 
@@ -88,7 +94,10 @@ pub struct ExportArgs {
     pub unclaimed: bool,
     #[arg(long, help = "Filter by claimer name")]
     pub claimer: Option<String>,
-    #[arg(long = "search", help = "Substring search in name+description (repeatable)")]
+    #[arg(
+        long = "search",
+        help = "Substring search in name+description (repeatable)"
+    )]
     pub search: Vec<String>,
     #[arg(long, help = "Output as JSON array instead of plain text")]
     pub json: bool,

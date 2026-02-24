@@ -9,7 +9,12 @@ fn open_test_db() -> (rusqlite::Connection, tempfile::TempPath) {
 }
 
 fn empty_filter() -> ListFilter {
-    ListFilter { status: None, claimed: None, claimer: None, search: vec![] }
+    ListFilter {
+        status: None,
+        claimed: None,
+        claimer: None,
+        search: vec![],
+    }
 }
 
 // ---- Filter: status ----
@@ -21,7 +26,10 @@ fn test_filter_by_status_returns_matching() {
     let id2 = ticket::create_ticket(&conn, "In-progress ticket", "").unwrap();
     ticket::update_ticket(&conn, id2, None, None, Some("in-progress")).unwrap();
 
-    let filter = ListFilter { status: Some("in-progress".to_string()), ..empty_filter() };
+    let filter = ListFilter {
+        status: Some("in-progress".to_string()),
+        ..empty_filter()
+    };
     let tickets = ticket::list_tickets_filtered(&conn, &filter).unwrap();
     assert_eq!(tickets.len(), 1);
     assert_eq!(tickets[0].name, "In-progress ticket");
@@ -32,7 +40,10 @@ fn test_filter_by_status_returns_empty_for_unknown() {
     let (conn, _tmp) = open_test_db();
     ticket::create_ticket(&conn, "Todo ticket", "").unwrap();
 
-    let filter = ListFilter { status: Some("done".to_string()), ..empty_filter() };
+    let filter = ListFilter {
+        status: Some("done".to_string()),
+        ..empty_filter()
+    };
     let tickets = ticket::list_tickets_filtered(&conn, &filter).unwrap();
     assert!(tickets.is_empty());
 }
@@ -46,7 +57,10 @@ fn test_filter_claimed_only() {
     let id2 = ticket::create_ticket(&conn, "Claimed", "").unwrap();
     ticket::claim_ticket(&mut conn, id2, "agent-1", false).unwrap();
 
-    let filter = ListFilter { claimed: Some(true), ..empty_filter() };
+    let filter = ListFilter {
+        claimed: Some(true),
+        ..empty_filter()
+    };
     let tickets = ticket::list_tickets_filtered(&conn, &filter).unwrap();
     assert_eq!(tickets.len(), 1);
     assert_eq!(tickets[0].name, "Claimed");
@@ -59,7 +73,10 @@ fn test_filter_unclaimed_only() {
     let id2 = ticket::create_ticket(&conn, "Claimed", "").unwrap();
     ticket::claim_ticket(&mut conn, id2, "agent-1", false).unwrap();
 
-    let filter = ListFilter { claimed: Some(false), ..empty_filter() };
+    let filter = ListFilter {
+        claimed: Some(false),
+        ..empty_filter()
+    };
     let tickets = ticket::list_tickets_filtered(&conn, &filter).unwrap();
     assert_eq!(tickets.len(), 1);
     assert_eq!(tickets[0].id, id1);
@@ -75,7 +92,10 @@ fn test_filter_by_claimer() {
     ticket::claim_ticket(&mut conn, id1, "alice", false).unwrap();
     ticket::claim_ticket(&mut conn, id2, "bob", false).unwrap();
 
-    let filter = ListFilter { claimer: Some("alice".to_string()), ..empty_filter() };
+    let filter = ListFilter {
+        claimer: Some("alice".to_string()),
+        ..empty_filter()
+    };
     let tickets = ticket::list_tickets_filtered(&conn, &filter).unwrap();
     assert_eq!(tickets.len(), 1);
     assert_eq!(tickets[0].name, "Alice task");
@@ -89,7 +109,10 @@ fn test_search_by_name() {
     ticket::create_ticket(&conn, "Fix the foo bug", "").unwrap();
     ticket::create_ticket(&conn, "Update bar component", "").unwrap();
 
-    let filter = ListFilter { search: vec!["foo".to_string()], ..empty_filter() };
+    let filter = ListFilter {
+        search: vec!["foo".to_string()],
+        ..empty_filter()
+    };
     let tickets = ticket::list_tickets_filtered(&conn, &filter).unwrap();
     assert_eq!(tickets.len(), 1);
     assert_eq!(tickets[0].name, "Fix the foo bug");
@@ -101,7 +124,10 @@ fn test_search_case_insensitive() {
     ticket::create_ticket(&conn, "Fix the foo bug", "").unwrap();
     ticket::create_ticket(&conn, "Update bar component", "").unwrap();
 
-    let filter = ListFilter { search: vec!["FOO".to_string()], ..empty_filter() };
+    let filter = ListFilter {
+        search: vec!["FOO".to_string()],
+        ..empty_filter()
+    };
     let tickets = ticket::list_tickets_filtered(&conn, &filter).unwrap();
     assert_eq!(tickets.len(), 1);
     assert_eq!(tickets[0].name, "Fix the foo bug");
@@ -113,7 +139,10 @@ fn test_search_by_description() {
     ticket::create_ticket(&conn, "Task one", "unique-desc-term here").unwrap();
     ticket::create_ticket(&conn, "Task two", "nothing special").unwrap();
 
-    let filter = ListFilter { search: vec!["unique-desc-term".to_string()], ..empty_filter() };
+    let filter = ListFilter {
+        search: vec!["unique-desc-term".to_string()],
+        ..empty_filter()
+    };
     let tickets = ticket::list_tickets_filtered(&conn, &filter).unwrap();
     assert_eq!(tickets.len(), 1);
     assert_eq!(tickets[0].name, "Task one");

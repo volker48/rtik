@@ -29,11 +29,21 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
             println!("Created: {} | Updated: {}", created_date, updated_date);
             let deps = ticket::list_deps(&conn, id)?;
             if !deps.forward.is_empty() {
-                let fwd = deps.forward.iter().map(|i| format!("#{}", i)).collect::<Vec<_>>().join(", ");
+                let fwd = deps
+                    .forward
+                    .iter()
+                    .map(|i| format!("#{}", i))
+                    .collect::<Vec<_>>()
+                    .join(", ");
                 println!("Depends on: {}", fwd);
             }
             if !deps.reverse.is_empty() {
-                let rev = deps.reverse.iter().map(|i| format!("#{}", i)).collect::<Vec<_>>().join(", ");
+                let rev = deps
+                    .reverse
+                    .iter()
+                    .map(|i| format!("#{}", i))
+                    .collect::<Vec<_>>()
+                    .join(", ");
                 println!("Required by: {}", rev);
             }
         }
@@ -77,7 +87,7 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
                     );
                 }
             } else {
-                println!("{:>4}  {:<9}  {}", "ID", "STATUS", "NAME");
+                println!("{:>4}  {:<9}  NAME", "ID", "STATUS");
                 println!("{}", "-".repeat(60));
                 for t in &tickets {
                     let name = format_name_with_deps(&t.name, dep_counts.get(&t.id).copied());
@@ -99,18 +109,16 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
             let name = ticket::block_ticket(&conn, args.id, &args.reason)?;
             println!("Blocked: #{} {}", args.id, name);
         }
-        Commands::Dep(args) => {
-            match args.action {
-                cli::DepAction::Add { ticket_id, dep_id } => {
-                    ticket::add_dep(&conn, ticket_id, dep_id)?;
-                    println!("Added: #{} depends on #{}", ticket_id, dep_id);
-                }
-                cli::DepAction::Remove { ticket_id, dep_id } => {
-                    ticket::remove_dep(&conn, ticket_id, dep_id)?;
-                    println!("Removed: #{} no longer depends on #{}", ticket_id, dep_id);
-                }
+        Commands::Dep(args) => match args.action {
+            cli::DepAction::Add { ticket_id, dep_id } => {
+                ticket::add_dep(&conn, ticket_id, dep_id)?;
+                println!("Added: #{} depends on #{}", ticket_id, dep_id);
             }
-        }
+            cli::DepAction::Remove { ticket_id, dep_id } => {
+                ticket::remove_dep(&conn, ticket_id, dep_id)?;
+                println!("Removed: #{} no longer depends on #{}", ticket_id, dep_id);
+            }
+        },
         Commands::Deps(args) => {
             let deps = ticket::list_deps(&conn, args.id)?;
             if deps.forward.is_empty() && deps.reverse.is_empty() {
@@ -140,7 +148,10 @@ pub fn run(cli: cli::Cli, conn: Connection) -> Result<(), AppError> {
             let filter = build_filter_from_export(&args);
             let exports = ticket::tickets_to_export(&conn, &filter)?;
             if args.json {
-                println!("{}", serde_json::to_string_pretty(&exports).expect("serialize"));
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&exports).expect("serialize")
+                );
             } else {
                 for e in &exports {
                     println!("{}", ticket::format_export_text(e));
@@ -210,10 +221,11 @@ fn format_name_with_deps(name: &str, dep_count: Option<i64>) -> String {
     }
 }
 
-fn load_dep_counts(conn: &Connection) -> Result<std::collections::HashMap<i64, i64>, ticket::AppError> {
-    let mut stmt = conn.prepare(
-        "SELECT ticket_id, COUNT(*) FROM ticket_deps GROUP BY ticket_id",
-    )?;
+fn load_dep_counts(
+    conn: &Connection,
+) -> Result<std::collections::HashMap<i64, i64>, ticket::AppError> {
+    let mut stmt =
+        conn.prepare("SELECT ticket_id, COUNT(*) FROM ticket_deps GROUP BY ticket_id")?;
     let rows = stmt.query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, i64>(1)?)))?;
     let mut map = std::collections::HashMap::new();
     for row in rows {

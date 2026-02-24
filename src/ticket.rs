@@ -60,7 +60,12 @@ pub fn validate_transition(from: &str, to: &str) -> Result<(), AppError> {
     }
 }
 
-pub fn claim_ticket(conn: &mut Connection, id: i64, agent: &str, force: bool) -> Result<(), AppError> {
+pub fn claim_ticket(
+    conn: &mut Connection,
+    id: i64,
+    agent: &str,
+    force: bool,
+) -> Result<(), AppError> {
     let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
 
     // Check unmet deps and warn.
@@ -126,7 +131,12 @@ pub fn claim_ticket(conn: &mut Connection, id: i64, agent: &str, force: bool) ->
     Ok(())
 }
 
-pub fn release_ticket(conn: &mut Connection, id: i64, agent: &str, force: bool) -> Result<(), AppError> {
+pub fn release_ticket(
+    conn: &mut Connection,
+    id: i64,
+    agent: &str,
+    force: bool,
+) -> Result<(), AppError> {
     let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
 
     let result: rusqlite::Result<Option<String>> = tx.query_row(
@@ -227,7 +237,10 @@ pub struct ListFilter {
     pub search: Vec<String>,
 }
 
-pub fn list_tickets_filtered(conn: &Connection, filter: &ListFilter) -> Result<Vec<Ticket>, AppError> {
+pub fn list_tickets_filtered(
+    conn: &Connection,
+    filter: &ListFilter,
+) -> Result<Vec<Ticket>, AppError> {
     let mut conditions: Vec<String> = Vec::new();
     let mut params: Vec<Box<dyn rusqlite::types::ToSql>> = Vec::new();
 
@@ -275,11 +288,20 @@ pub fn list_tickets_filtered(conn: &Connection, filter: &ListFilter) -> Result<V
             updated_at: row.get(6)?,
         })
     })?;
-    rows.collect::<rusqlite::Result<Vec<_>>>().map_err(AppError::Db)
+    rows.collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(AppError::Db)
 }
 
 pub fn list_tickets(conn: &Connection) -> Result<Vec<Ticket>, AppError> {
-    list_tickets_filtered(conn, &ListFilter { status: None, claimed: None, claimer: None, search: vec![] })
+    list_tickets_filtered(
+        conn,
+        &ListFilter {
+            status: None,
+            claimed: None,
+            claimer: None,
+            search: vec![],
+        },
+    )
 }
 
 #[derive(Serialize)]
@@ -292,7 +314,10 @@ pub struct TicketExport {
     pub dependencies: Vec<i64>,
 }
 
-pub fn tickets_to_export(conn: &Connection, filter: &ListFilter) -> Result<Vec<TicketExport>, AppError> {
+pub fn tickets_to_export(
+    conn: &Connection,
+    filter: &ListFilter,
+) -> Result<Vec<TicketExport>, AppError> {
     let tickets = list_tickets_filtered(conn, filter)?;
     tickets
         .into_iter()
@@ -363,14 +388,13 @@ pub fn update_ticket(
 
     let mut sets: Vec<&str> = Vec::new();
     let mut params: Vec<(&str, &dyn rusqlite::types::ToSql)> = Vec::new();
-
-    if name.is_some() {
+    if let Some(ref name) = name {
         sets.push("name = :name");
-        params.push((":name", name.as_ref().unwrap()));
+        params.push((":name", name));
     }
-    if desc.is_some() {
+    if let Some(ref desc) = desc {
         sets.push("description = :desc");
-        params.push((":desc", desc.as_ref().unwrap()));
+        params.push((":desc", desc));
     }
     if let Some(ref ns) = normalized_status {
         sets.push("status = :status");
@@ -486,15 +510,14 @@ pub fn remove_dep(conn: &Connection, ticket_id: i64, depends_on: i64) -> Result<
 }
 
 pub fn list_deps(conn: &Connection, ticket_id: i64) -> Result<DepInfo, AppError> {
-    let mut stmt = conn.prepare(
-        "SELECT depends_on FROM ticket_deps WHERE ticket_id=?1 ORDER BY depends_on",
-    )?;
+    let mut stmt =
+        conn.prepare("SELECT depends_on FROM ticket_deps WHERE ticket_id=?1 ORDER BY depends_on")?;
     let forward: Vec<i64> = stmt
         .query_map(rusqlite::params![ticket_id], |r| r.get(0))?
         .collect::<rusqlite::Result<Vec<_>>>()?;
 
-    let mut stmt = conn
-        .prepare("SELECT ticket_id FROM ticket_deps WHERE depends_on=?1 ORDER BY ticket_id")?;
+    let mut stmt =
+        conn.prepare("SELECT ticket_id FROM ticket_deps WHERE depends_on=?1 ORDER BY ticket_id")?;
     let reverse: Vec<i64> = stmt
         .query_map(rusqlite::params![ticket_id], |r| r.get(0))?
         .collect::<rusqlite::Result<Vec<_>>>()?;
@@ -561,5 +584,5 @@ fn days_to_ymd(mut days: u64) -> (u64, u64, u64) {
 }
 
 fn is_leap(y: u64) -> bool {
-    (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)
+    (y.is_multiple_of(4) && !y.is_multiple_of(100)) || y.is_multiple_of(400)
 }

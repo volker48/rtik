@@ -107,8 +107,14 @@ fn created_at_preserved_updated_at_changes_on_update() {
     ticket::update_ticket(&conn, id, Some("New name"), None, None).unwrap();
     let after = ticket::get_ticket(&conn, id).unwrap();
 
-    assert_eq!(before.created_at, after.created_at, "created_at should not change");
-    assert_ne!(before.updated_at, after.updated_at, "updated_at should change after update");
+    assert_eq!(
+        before.created_at, after.created_at,
+        "created_at should not change"
+    );
+    assert_ne!(
+        before.updated_at, after.updated_at,
+        "updated_at should change after update"
+    );
 }
 
 #[test]
@@ -127,8 +133,14 @@ fn created_at_is_iso8601_utc_format() {
     let (conn, _tmp) = open_test_db();
     let id = ticket::create_ticket(&conn, "Task", "").unwrap();
     let t = ticket::get_ticket(&conn, id).unwrap();
-    assert!(t.created_at.contains('T'), "created_at should be ISO 8601 with T separator");
-    assert!(t.created_at.ends_with('Z'), "created_at should end with Z (UTC)");
+    assert!(
+        t.created_at.contains('T'),
+        "created_at should be ISO 8601 with T separator"
+    );
+    assert!(
+        t.created_at.ends_with('Z'),
+        "created_at should end with Z (UTC)"
+    );
 }
 
 // ---- Phase 2 tests: Claim ----
@@ -227,7 +239,10 @@ fn done_to_todo_is_invalid() {
     ticket::update_ticket(&conn, id, None, None, Some("in-progress")).unwrap();
     ticket::update_ticket(&conn, id, None, None, Some("done")).unwrap();
     let result = ticket::update_ticket(&conn, id, None, None, Some("todo"));
-    assert!(matches!(result, Err(ticket::AppError::InvalidTransition { .. })));
+    assert!(matches!(
+        result,
+        Err(ticket::AppError::InvalidTransition { .. })
+    ));
 }
 
 #[test]
@@ -256,7 +271,10 @@ fn todo_to_done_is_invalid() {
     let (conn, _tmp) = open_test_db();
     let id = ticket::create_ticket(&conn, "Task", "").unwrap();
     let result = ticket::update_ticket(&conn, id, None, None, Some("done"));
-    assert!(matches!(result, Err(ticket::AppError::InvalidTransition { .. })));
+    assert!(matches!(
+        result,
+        Err(ticket::AppError::InvalidTransition { .. })
+    ));
 }
 
 // ---- Phase 2 tests: Done auto-release ----
@@ -306,7 +324,10 @@ fn circular_dep_rejected() {
     ticket::add_dep(&conn, b, a).unwrap();
     ticket::add_dep(&conn, c, b).unwrap();
     let result = ticket::add_dep(&conn, a, c);
-    assert!(matches!(result, Err(ticket::AppError::CyclicDependency(..))));
+    assert!(matches!(
+        result,
+        Err(ticket::AppError::CyclicDependency(..))
+    ));
 }
 
 #[test]
@@ -314,7 +335,10 @@ fn self_dep_rejected() {
     let (conn, _tmp) = open_test_db();
     let id = ticket::create_ticket(&conn, "A", "").unwrap();
     let result = ticket::add_dep(&conn, id, id);
-    assert!(matches!(result, Err(ticket::AppError::CyclicDependency(..))));
+    assert!(matches!(
+        result,
+        Err(ticket::AppError::CyclicDependency(..))
+    ));
 }
 
 #[test]

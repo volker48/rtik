@@ -15,7 +15,7 @@ static MIGRATIONS: &[M<'static>] = &[
                         CHECK(status IN ('todo','wip','blocked','done')),
             created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
             updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
-        );"
+        );",
     ),
     M::up(
         "CREATE TABLE tickets_new (
@@ -43,7 +43,7 @@ static MIGRATIONS: &[M<'static>] = &[
             depends_on INTEGER NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
             PRIMARY KEY (ticket_id, depends_on),
             CHECK (ticket_id != depends_on)
-        );"
+        );",
     ),
 ];
 
